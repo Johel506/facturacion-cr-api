@@ -111,8 +111,8 @@ class Tenant(Base):
     created_by = Column(String(255), nullable=True, comment="User who created the tenant")
     updated_by = Column(String(255), nullable=True, comment="User who last updated the tenant")
     
-    # Relationships (will be defined when other models are created)
-    # documentos = relationship("Document", back_populates="tenant", cascade="all, delete-orphan")
+    # Relationships
+    documentos = relationship("Document", back_populates="tenant", cascade="all, delete-orphan")
     
     # Table constraints
     __table_args__ = (
