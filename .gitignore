@@ -159,3 +159,6 @@ temp/
 .kiro/settings/
 .kiro/cache/
 .kiro/logs/
+
+# Costa Rica official documentation (keep local copy, don't commit to repo)
+Estructuras XML y Anexos Version 4.4/
