@@ -125,7 +125,7 @@ class DocumentDetail(Base):
     
     # Relationships
     documento = relationship("Document", back_populates="detalles")
-    # impuestos = relationship("DocumentTax", back_populates="detalle", cascade="all, delete-orphan")
+    impuestos = relationship("DocumentTax", back_populates="detalle", cascade="all, delete-orphan")
     
     # Table constraints and indexes
     __table_args__ = (
