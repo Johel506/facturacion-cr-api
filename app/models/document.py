@@ -225,7 +225,7 @@ class Document(Base):
     
     # Relationships
     tenant = relationship("Tenant", back_populates="documentos")
-    # detalles = relationship("DocumentDetail", back_populates="documento", cascade="all, delete-orphan")
+    detalles = relationship("DocumentDetail", back_populates="documento", cascade="all, delete-orphan")
     # referencias = relationship("DocumentReference", back_populates="documento", cascade="all, delete-orphan")
     # otros_cargos = relationship("DocumentOtherCharge", back_populates="documento", cascade="all, delete-orphan")
     # mensajes_receptor = relationship("ReceptorMessage", back_populates="documento")
