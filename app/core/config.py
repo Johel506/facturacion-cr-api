@@ -20,16 +20,13 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     
     # CORS
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
+    BACKEND_CORS_ORIGINS: str = ""
     
-    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
-    @classmethod
-    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
-        elif isinstance(v, (list, str)):
-            return v
-        raise ValueError(v)
+    def get_cors_origins(self) -> List[str]:
+        """Get CORS origins as a list"""
+        if not self.BACKEND_CORS_ORIGINS:
+            return []
+        return [origin.strip() for origin in self.BACKEND_CORS_ORIGINS.split(",") if origin.strip()]
     
     # Database (Supabase PostgreSQL)
     DATABASE_URL: str = "postgresql://user:pass@localhost/test"
@@ -50,6 +47,8 @@ class Settings(BaseSettings):
     RATE_LIMIT_ENTERPRISE: int = 2000  # requests per hour for enterprise plan
     
     # Ministry of Finance API
+    HACIENDA_API_URL_DEV: str = "https://idp.comprobanteselectronicos.go.cr"
+    HACIENDA_API_URL_PROD: str = "https://api.comprobanteselectronicos.go.cr"
     MINISTRY_API_URL_DEV: str = "https://api.comprobanteselectronicos.go.cr/recepcion-sandbox/v1"
     MINISTRY_API_URL_PROD: str = "https://api.comprobanteselectronicos.go.cr/recepcion/v1"
     MINISTRY_ENVIRONMENT: str = "development"  # development or production
@@ -71,7 +70,7 @@ class Settings(BaseSettings):
     XSD_CACHE_TTL: int = 86400  # 24 hours
     
     model_config = ConfigDict(
-        env_file=".env",
+        env_file=[".env.local", ".env"],  # Busca .env.local primero, luego .env
         case_sensitive=True
     )
 
