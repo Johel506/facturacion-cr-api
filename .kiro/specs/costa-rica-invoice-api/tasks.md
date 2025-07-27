@@ -124,8 +124,8 @@
     - Execute: `git add app/utils/business_validators.py && git commit -m "feat(validators): implement advanced business validation rules"`
     - _Requirements: 9.1, 11.3, 11.6, 14.1_
 
-- [ ] 4. Implement authentication and security layer
-  - [ ] 4.1 Create API key authentication system
+- [x] 4. Implement authentication and security layer
+  - [x] 4.1 Create API key authentication system
     - Implement cryptographically secure API key generation (minimum 32 characters)
     - Create middleware for API key authentication with tenant identification
     - Add API key validation with proper error responses (HTTP 401)
@@ -133,7 +133,7 @@
     - Execute: `git add app/core/security.py app/middleware/auth.py && git commit -m "feat(auth): implement secure API key authentication system"`
     - _Requirements: 4.1, 4.2, 1.3_
 
-  - [ ] 4.2 Implement comprehensive rate limiting
+  - [x] 4.2 Implement comprehensive rate limiting
     - Create Redis-based rate limiting system with sliding window algorithm
     - Implement different limits per tenant plan (básico: 100/month, pro: 1000/month, empresa: unlimited)
     - Add rate limit headers to responses and per-endpoint/tenant limiting
@@ -141,7 +141,7 @@
     - Execute: `git add app/core/rate_limiting.py app/middleware/rate_limit.py && git commit -m "feat(auth): implement Redis-based rate limiting with tenant plans"`
     - _Requirements: 4.3, 1.4, 1.5_
 
-  - [ ] 4.3 Add encryption and certificate security utilities
+  - [x] 4.3 Add encryption and certificate security utilities
     - Implement AES-256 encryption for P12 certificates and passwords
     - Create secure certificate storage with encrypted fields in database
     - Add P12 certificate validation, parsing, and expiration checking
@@ -149,8 +149,8 @@
     - Execute: `git add app/utils/crypto_utils.py app/utils/certificate_utils.py && git commit -m "feat(security): implement encryption and certificate management utilities"`
     - _Requirements: 4.5, 3.6, 1.2_
 
-- [ ] 5. Implement tenant management service
-  - [ ] 5.1 Create comprehensive tenant CRUD operations
+- [x] 5. Implement tenant management service
+  - [x] 5.1 Create comprehensive tenant CRUD operations
     - Implement tenant creation with enhanced validation (cedula jurídica format, email verification)
     - Add tenant retrieval and update functionality with plan management
     - Create tenant activation/deactivation with cascade effects
@@ -159,7 +159,7 @@
     - Execute: `git add app/services/tenant_service.py app/api/v1/endpoints/tenants.py && git commit -m "feat(tenants): implement comprehensive tenant CRUD operations"`
     - _Requirements: 1.1, 1.5_
 
-  - [ ] 5.2 Implement advanced certificate management
+  - [x] 5.2 Implement advanced certificate management
     - Create P12 certificate upload with validation and secure storage
     - Add certificate parsing, validation, and expiration checking
     - Implement certificate caching in Redis with TTL management
