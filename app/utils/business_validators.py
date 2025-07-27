@@ -445,10 +445,62 @@ class BusinessLogicValidator:
         numero_vin = line_item.get('numero_vin_serie')
         if numero_vin:
             import re
-            if not re.match(r'^[A-HJ-NPR-Z0-9]{17}$', numero_vin):
+            if not re.match(r'^[A-HJ-NPR-Z0-9]{17}$', numero_vin):$', numero_vin):
                 errors.append(f"Line {line_number}: Invalid VIN format")
         
         return len(errors) == 0, errors
+
+
+def validate_email_format(email: str) -> bool:
+    """
+    Validate email format using regex pattern.
+    
+    Args:
+        email: Email address to validate
+    
+    Returns:
+        True if email format is valid, False otherwise
+    """
+    import re
+    
+    if not email or not isinstance(email, str):
+        return False
+    
+    # Basic email regex pattern
+    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    
+    return bool(re.match(email_pattern, email.strip()))
+
+
+def validate_phone_format(phone: str, country_code: str = "506") -> bool:
+    """
+    Validate Costa Rican phone number format.
+    
+    Args:
+        phone: Phone number to validate
+        country_code: Country code (default: 506 for Costa Rica)
+    
+    Returns:
+        True if phone format is valid, False otherwise
+    """
+    import re
+    
+    if not phone or not isinstance(phone, str):
+        return False
+    
+    # Remove spaces, dashes, and parentheses
+    clean_phone = re.sub(r'[\s\-\(\)]', '', phone)
+    
+    # Costa Rican phone patterns
+    if country_code == "506":
+        # 8-digit format: NNNN-NNNN
+        if re.match(r'^\d{8}$', clean_phone):
+            return True
+        # With country code: +506-NNNN-NNNN or 506-NNNN-NNNN
+        if re.match(r'^(\+?506)?\d{8}$', clean_phone):
+            return True
+    
+    return False
 
 
 def validate_complete_document(document_data: Dict[str, Any]) -> Tuple[bool, List[str]]:

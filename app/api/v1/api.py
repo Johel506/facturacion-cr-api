@@ -3,14 +3,16 @@ API router aggregation for v1 endpoints
 """
 from fastapi import APIRouter
 
-# Import endpoint routers (will be created in later tasks)
-# from app.api.v1.endpoints import auth, tenants, invoices, cabys, utils
+# Import endpoint routers
+from app.api.v1.endpoints import tenants
 
 api_router = APIRouter()
 
-# Include endpoint routers (will be uncommented in later tasks)
+# Include endpoint routers
+api_router.include_router(tenants.router, prefix="/tenants", tags=["tenants"])
+
+# Future endpoints (will be uncommented in later tasks)
 # api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
-# api_router.include_router(tenants.router, prefix="/tenants", tags=["tenants"])
 # api_router.include_router(invoices.router, prefix="/facturas", tags=["invoices"])
 # api_router.include_router(cabys.router, prefix="/cabys", tags=["cabys"])
 # api_router.include_router(utils.router, prefix="/utils", tags=["utilities"])

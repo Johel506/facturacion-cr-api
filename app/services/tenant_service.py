@@ -21,8 +21,7 @@ from app.core.security import (
     encrypt_certificate_data, decrypt_certificate_data
 )
 from app.core.database import get_db
-from app.utils.validators import validate_cedula_juridica
-from app.utils.business_validators import validate_email_format
+from app.utils.business_validators_fixed import validate_email_format, validate_cedula_juridica
 
 
 class TenantService:
