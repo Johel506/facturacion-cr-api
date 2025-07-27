@@ -54,6 +54,17 @@ class Settings(BaseSettings):
     MINISTRY_ENVIRONMENT: str = "development"  # development or production
     MINISTRY_TIMEOUT: int = 30
     
+    # Ministry OAuth2 credentials
+    MINISTRY_CLIENT_ID: str = ""
+    MINISTRY_CLIENT_SECRET: str = ""
+    
+    # Ministry API rate limiting
+    MINISTRY_MAX_RETRIES: int = 3
+    MINISTRY_RETRY_DELAY: int = 2  # Base delay in seconds for exponential backoff
+    
+    # Callback URL for asynchronous responses (if supported)
+    MINISTRY_CALLBACK_URL: Optional[str] = None
+    
     # Encryption
     ENCRYPTION_KEY: str = secrets.token_urlsafe(32)
     

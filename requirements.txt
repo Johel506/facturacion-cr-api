@@ -26,6 +26,9 @@ xmlschema==2.5.1
 # HTTP client for Ministry API
 httpx==0.25.2
 
+# OAuth 2.0 / OIDC for Ministry authentication
+authlib==1.2.1
+
 # Environment variables
 python-dotenv==1.0.0
 
