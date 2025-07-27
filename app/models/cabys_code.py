@@ -47,7 +47,7 @@ class CabysCode(Base):
     descripcion_ingles = Column(Text, nullable=True,
                                comment="Product or service description in English")
     
-    # Classification hierarchy
+    # Classification hierarchy (8 levels as per official CABYS structure)
     categoria_nivel_1 = Column(String(255), nullable=True,
                               comment="Level 1 category (broadest classification)")
     categoria_nivel_2 = Column(String(255), nullable=True,
@@ -55,7 +55,15 @@ class CabysCode(Base):
     categoria_nivel_3 = Column(String(255), nullable=True,
                               comment="Level 3 category (detailed classification)")
     categoria_nivel_4 = Column(String(255), nullable=True,
-                              comment="Level 4 category (most specific classification)")
+                              comment="Level 4 category")
+    categoria_nivel_5 = Column(String(255), nullable=True,
+                              comment="Level 5 category")
+    categoria_nivel_6 = Column(String(255), nullable=True,
+                              comment="Level 6 category")
+    categoria_nivel_7 = Column(String(255), nullable=True,
+                              comment="Level 7 category")
+    categoria_nivel_8 = Column(String(255), nullable=True,
+                              comment="Level 8 category (most specific classification)")
     
     # Tax information
     impuesto_iva = Column(Numeric(4, 2), nullable=False, default=Decimal('13.00'),
@@ -136,6 +144,12 @@ class CabysCode(Base):
         Index("idx_cabys_search_vector", "search_vector", postgresql_using="gin"),
         Index("idx_cabys_categoria_1", "categoria_nivel_1"),
         Index("idx_cabys_categoria_2", "categoria_nivel_2"),
+        Index("idx_cabys_categoria_3", "categoria_nivel_3"),
+        Index("idx_cabys_categoria_4", "categoria_nivel_4"),
+        Index("idx_cabys_categoria_5", "categoria_nivel_5"),
+        Index("idx_cabys_categoria_6", "categoria_nivel_6"),
+        Index("idx_cabys_categoria_7", "categoria_nivel_7"),
+        Index("idx_cabys_categoria_8", "categoria_nivel_8"),
         Index("idx_cabys_impuesto_iva", "impuesto_iva"),
         Index("idx_cabys_exento_iva", "exento_iva"),
         Index("idx_cabys_veces_usado", "veces_usado"),
@@ -188,7 +202,11 @@ class CabysCode(Base):
             self.categoria_nivel_1,
             self.categoria_nivel_2,
             self.categoria_nivel_3,
-            self.categoria_nivel_4
+            self.categoria_nivel_4,
+            self.categoria_nivel_5,
+            self.categoria_nivel_6,
+            self.categoria_nivel_7,
+            self.categoria_nivel_8
         ]
         return " > ".join(filter(None, categorias))
     
@@ -306,7 +324,7 @@ class CabysCode(Base):
         Args:
             session: SQLAlchemy session
             categoria: Category name to search for
-            nivel: Category level (1-4)
+            nivel: Category level (1-8)
             limit: Maximum number of results
             only_active: Whether to include only active codes
             
@@ -318,12 +336,16 @@ class CabysCode(Base):
         if only_active:
             base_query = base_query.filter(cls.activo == True)
         
-        # Select appropriate category level
+        # Select appropriate category level (1-8)
         category_field = {
             1: cls.categoria_nivel_1,
             2: cls.categoria_nivel_2,
             3: cls.categoria_nivel_3,
-            4: cls.categoria_nivel_4
+            4: cls.categoria_nivel_4,
+            5: cls.categoria_nivel_5,
+            6: cls.categoria_nivel_6,
+            7: cls.categoria_nivel_7,
+            8: cls.categoria_nivel_8
         }.get(nivel, cls.categoria_nivel_1)
         
         results = base_query.filter(

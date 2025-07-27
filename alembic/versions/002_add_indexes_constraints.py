@@ -321,11 +321,11 @@ def upgrade() -> None:
         WHERE estado IN ('BORRADOR', 'ERROR') AND intentos_envio < 3
     """)
     
-    # Documents requiring retry
+    # Documents requiring retry (removed NOW() function as it's not immutable)
     op.execute("""
         CREATE INDEX idx_documentos_retry_queue 
         ON documentos (proximo_intento, intentos_envio) 
-        WHERE estado = 'ERROR' AND proximo_intento IS NOT NULL AND proximo_intento <= NOW()
+        WHERE estado = 'ERROR' AND proximo_intento IS NOT NULL
     """)
     
     # Receptor messages pending send

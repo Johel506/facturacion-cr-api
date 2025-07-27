@@ -9,14 +9,14 @@
   - _Requirements: 18.3, 18.5_
 
 - [-] 2. Implement database models and migrations
-  - [ ] 2.1 Create core SQLAlchemy models
+  - [x] 2.1 Create core SQLAlchemy models
     - [x] 2.1.1 Implement complete Tenant model
       - Create Tenant model with basic fields, encrypted certificate storage, and plan limits
       - Add usage tracking and monthly limits functionality
       - Execute: `git add app/models/tenant.py && git commit -m "feat(models): implement Tenant model with certificate storage and plan limits"`
       - _Requirements: 1.1, 1.2, 1.4, 1.5_
     
-    - [-] 2.1.2 Implement unified Document model
+    - [x] 2.1.2 Implement unified Document model
       - Create Document model supporting all 7 document types with header fields
       - Add emisor/receptor data, transaction conditions, and payment methods
       - Include currency support, totals calculation, and XML storage
@@ -24,14 +24,14 @@
       - Execute: `git add app/models/document.py && git commit -m "feat(models): implement unified Document model for all 7 document types"`
       - _Requirements: 9.1, 11.1, 11.3, 11.4, 13.1, 13.4, 3.4, 3.5_
 
-  - [ ] 2.2 Create document detail and relationship models
-    - [ ] 2.2.1 Implement complete DocumentDetail model
+  - [x] 2.2 Create document detail and relationship models
+    - [x] 2.2.1 Implement complete DocumentDetail model
       - Create DocumentDetail model with line item fields, product identification (CABYS, commercial codes)
       - Add quantity, pricing, discount fields, and special product fields (VIN, medicine, pharmacy)
       - Execute: `git add app/models/document_detail.py && git commit -m "feat(models): implement DocumentDetail model with product and pricing fields"`
       - _Requirements: 17.1, 11.2, 17.2, 14.3, 17.4, 17.5_
     
-    - [ ] 2.2.2 Create document relationship models
+    - [x] 2.2.2 Create document relationship models
       - Create DocumentReference model for credit/debit note relationships
       - Add DocumentTax model supporting all Costa Rican tax types
       - Implement DocumentExemption model for tax exemption handling
@@ -39,39 +39,39 @@
       - Execute: `git add app/models/document_reference.py app/models/document_tax.py app/models/document_exemption.py app/models/document_other_charge.py && git commit -m "feat(models): implement document relationship and tax models"`
       - _Requirements: 15.1, 15.2, 14.1, 14.2, 14.4_
 
-  - [ ] 2.3 Create reference data models
-    - [ ] 2.3.1 Create CabysCode model with search capabilities
+  - [x] 2.3 Create reference data models
+    - [x] 2.3.1 Create CabysCode model with search capabilities
       - Execute: `git add app/models/cabys_code.py && git commit -m "feat(models): create CabysCode model with full-text search support"`
       - _Requirements: 11.2, 11.3_
     
-    - [ ] 2.3.2 Create GeographicLocation model for Costa Rican addresses
+    - [x] 2.3.2 Create GeographicLocation model for Costa Rican addresses
       - Execute: `git add app/models/geographic_location.py && git commit -m "feat(models): create GeographicLocation model for CR provinces/cantons/districts"`
       - _Requirements: 12.1, 12.2, 12.3_
     
-    - [ ] 2.3.3 Create UnitsOfMeasure model for official units
+    - [x] 2.3.3 Create UnitsOfMeasure model for official units
       - Execute: `git add app/models/units_of_measure.py && git commit -m "feat(models): create UnitsOfMeasure model with RTC 443:2010 standard"`
       - _Requirements: 17.1_
     
-    - [ ] 2.3.4 Create ReceptorMessage model for document responses
+    - [x] 2.3.4 Create ReceptorMessage model for document responses
       - Execute: `git add app/models/receptor_message.py && git commit -m "feat(models): create ReceptorMessage model for document acceptance/rejection"`
       - _Requirements: 16.1, 16.2_
 
-  - [ ] 2.4 Set up Alembic migrations
-    - [ ] 2.4.1 Configure Alembic and create initial migration
+  - [x] 2.4 Set up Alembic migrations
+    - [x] 2.4.1 Configure Alembic and create initial migration
       - Configure Alembic with proper settings for database migrations
       - Create initial migration for tenant and core tables with all relationships
       - Execute: `git add alembic.ini alembic/env.py alembic/versions/001_initial_tables.py && git commit -m "migration: configure Alembic and create initial database schema"`
       - _Requirements: 8.5, 1.1, 9.1_
     
-    - [ ] 2.4.2 Add performance indexes and database constraints
+    - [x] 2.4.2 Add performance indexes and database constraints
       - Add comprehensive performance indexes for document keys and tenant isolation
       - Implement foreign key constraints with proper cascade rules
       - Add check constraints for document types and identification validation
       - Execute: `git add alembic/versions/002_add_indexes_constraints.py && git commit -m "migration: add performance indexes and database constraints"`
       - _Requirements: 8.5, 10.1, 1.5, 15.5, 11.1, 11.6_
 
-  - [ ] 2.5 Create and execute reference data seeding
-    - [ ] 2.5.1 Create comprehensive reference data seeding scripts
+  - [x] 2.5 Create and execute reference data seeding
+    - [x] 2.5.1 Create comprehensive reference data seeding scripts
       - Create CABYS codes seeding script from official Excel file
       - Add Costa Rican geographic data seeding (provinces, cantons, districts)
       - Implement units of measure seeding script with RTC 443:2010 standard
@@ -79,22 +79,22 @@
       - Execute: `git add scripts/seed_cabys.py scripts/seed_locations.py scripts/seed_units.py scripts/seed_dev_data.py && git commit -m "feat(data): create comprehensive reference data seeding scripts"`
       - _Requirements: 11.2, 12.1, 17.1, 18.3_
 
-- [ ] 3. Implement Pydantic schemas and validation
-  - [ ] 3.1 Create core enums and base data models
+- [x] 3. Implement Pydantic schemas and validation
+  - [x] 3.1 Create core enums and base data models
     - Create all document type enums (DocumentType, IdentificationType, SaleCondition, PaymentMethod, TaxCode, IVATariffCode)
     - Implement base data models (IdentificationData, LocationData, PhoneData, EmisorData, ReceptorData)
     - Add comprehensive validation for Costa Rican business rules
     - Execute: `git add app/schemas/enums.py app/schemas/base.py && git commit -m "feat(schemas): implement core enums and base data models with CR validation"`
     - _Requirements: 9.1, 11.1, 11.3, 11.4, 12.1, 12.2, 12.3, 13.1, 14.1, 14.2_
 
-  - [ ] 3.2 Create document line item and tax models
+  - [x] 3.2 Create document line item and tax models
     - Create comprehensive DocumentLineItem with product fields, commercial codes, and identification
     - Implement TaxData, ExemptionData, and DiscountData models supporting all Costa Rican tax types
     - Add PackageComponent model for product combos and surtidos
     - Execute: `git add app/schemas/document_items.py && git commit -m "feat(schemas): implement document line item models with tax and product support"`
     - _Requirements: 17.1, 17.2, 14.1, 14.2, 14.3, 17.6_
 
-  - [ ] 3.3 Create document and reference models
+  - [x] 3.3 Create document and reference models
     - Create DocumentReference model for credit/debit note relationships
     - Implement OtherCharge model for stamps and additional fees
     - Create main DocumentCreate model supporting all 7 document types
@@ -102,14 +102,14 @@
     - Execute: `git add app/schemas/documents.py && git commit -m "feat(schemas): implement document and reference models for all document types"`
     - _Requirements: 15.1, 15.2, 14.4, 9.1, 5.1, 5.2_
 
-  - [ ] 3.4 Create tenant and message models
+  - [x] 3.4 Create tenant and message models
     - Create tenant management models (TenantCreate, TenantUpdate, TenantResponse)
     - Implement certificate management models (CertificateUpload, CertificateStatus)
     - Add receptor message models (ReceptorMessageCreate, ReceptorMessageResponse)
     - Execute: `git add app/schemas/tenants.py app/schemas/messages.py && git commit -m "feat(schemas): implement tenant and receptor message models"`
     - _Requirements: 1.1, 1.2, 16.1, 16.2_
 
-  - [ ] 3.5 Implement comprehensive validators
+  - [x] 3.5 Implement comprehensive validators
     - Create identification number validators for all 6 types (física, jurídica, DIMEX, NITE, extranjero, no contribuyente)
     - Implement CABYS code format validation with database lookup
     - Add consecutive number and document key validators (20 and 50 character formats)
@@ -117,7 +117,7 @@
     - Execute: `git add app/utils/validators.py && git commit -m "feat(validators): implement comprehensive Costa Rican validation rules"`
     - _Requirements: 11.1, 11.2, 11.3, 10.1, 10.2, 10.3, 10.4, 12.1, 12.4, 13.1, 14.1, 14.5_
 
-  - [ ] 3.6 Add advanced business validation rules
+  - [x] 3.6 Add advanced business validation rules
     - Create document type specific validators and cross-field validation rules
     - Implement conditional field validation for "Others" codes requiring descriptions
     - Add business logic validation (credit sales require plazo_credito, exemptions require documents)

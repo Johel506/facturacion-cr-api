@@ -1,0 +1,1 @@
+# Pydantic schemas for Costa Rica Invoice API
