@@ -79,6 +79,18 @@ class RedisManager:
             await self.connect()
         return await self.redis_client.expire(key, ttl)
     
+    async def hset(self, key: str, mapping: dict) -> int:
+        """Set hash fields in Redis"""
+        if not self.redis_client:
+            await self.connect()
+        return await self.redis_client.hset(key, mapping=mapping)
+    
+    async def hgetall(self, key: str) -> dict:
+        """Get all hash fields from Redis"""
+        if not self.redis_client:
+            await self.connect()
+        return await self.redis_client.hgetall(key)
+    
     async def health_check(self) -> bool:
         """Check Redis connection health"""
         try:
@@ -92,6 +104,11 @@ class RedisManager:
 
 # Global Redis manager instance
 redis_manager = RedisManager()
+
+
+def get_redis_client():
+    """Get Redis client instance"""
+    return redis_manager
 
 
 class CacheService:

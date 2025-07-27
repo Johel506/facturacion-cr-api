@@ -494,3 +494,16 @@ def validate_all_business_rules(document_data: Dict[str, Any]) -> Tuple[bool, li
         errors.append(f"Validation error: {str(e)}")
     
     return len(errors) == 0, errors
+
+
+# Convenience functions for tenant service
+def validate_cedula_juridica(cedula: str) -> bool:
+    """Validate legal ID format for tenant service."""
+    return IdentificationValidator.validate_cedula_juridica(cedula)
+
+
+def validate_email_format(email: str) -> bool:
+    """Validate email format."""
+    import re
+    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(email_pattern, email) is not None
