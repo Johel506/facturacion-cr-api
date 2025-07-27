@@ -48,13 +48,15 @@ class Settings(BaseSettings):
     
     # Ministry of Finance API
     HACIENDA_API_URL_DEV: str = "https://idp.comprobanteselectronicos.go.cr"
-    HACIENDA_API_URL_PROD: str = "https://api.comprobanteselectronicos.go.cr"
-    MINISTRY_API_URL_DEV: str = "https://api.comprobanteselectronicos.go.cr/recepcion-sandbox/v1"
+    HACIENDA_API_URL_PROD: str = "https://idp.comprobanteselectronicos.go.cr"
+    MINISTRY_API_URL_DEV: str = "https://api-sandbox.comprobanteselectronicos.go.cr/recepcion/v1"
     MINISTRY_API_URL_PROD: str = "https://api.comprobanteselectronicos.go.cr/recepcion/v1"
     MINISTRY_ENVIRONMENT: str = "development"  # development or production
     MINISTRY_TIMEOUT: int = 30
     
-    # Ministry OAuth2 credentials
+    # Ministry authentication credentials
+    MINISTRY_USERNAME: str = ""
+    MINISTRY_PASSWORD: str = ""
     MINISTRY_CLIENT_ID: str = ""
     MINISTRY_CLIENT_SECRET: str = ""
     

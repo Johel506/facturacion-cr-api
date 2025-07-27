@@ -38,17 +38,21 @@ class MinistryService:
         self.timeout = settings.MINISTRY_TIMEOUT
         self.max_retries = settings.MINISTRY_MAX_RETRIES
         
-        # Client credentials from settings
+        # Authentication credentials from settings
+        self.default_username = settings.MINISTRY_USERNAME
+        self.default_password = settings.MINISTRY_PASSWORD
         self.default_client_id = settings.MINISTRY_CLIENT_ID
         self.default_client_secret = settings.MINISTRY_CLIENT_SECRET
         
-        if not self.default_client_id or not self.default_client_secret:
-            logger.warning("Ministry OAuth2 credentials not configured in settings")
+        if not self.default_username or not self.default_password or not self.default_client_id:
+            logger.warning("Ministry authentication credentials not configured in settings")
         
         logger.info(f"Ministry service initialized for {self.environment} environment")
     
     def _get_ministry_client(
         self,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
         client_id: Optional[str] = None,
         client_secret: Optional[str] = None
     ) -> MinistryClient:
@@ -56,6 +60,8 @@ class MinistryService:
         Create Ministry API client with appropriate credentials
         
         Args:
+            username: Ministry username (uses default if not provided)
+            password: Ministry password (uses default if not provided)
             client_id: OAuth2 client ID (uses default if not provided)
             client_secret: OAuth2 client secret (uses default if not provided)
         
@@ -63,6 +69,8 @@ class MinistryService:
             Configured MinistryClient instance
         """
         return MinistryClient(
+            username=username or self.default_username,
+            password=password or self.default_password,
             client_id=client_id or self.default_client_id,
             client_secret=client_secret or self.default_client_secret,
             environment=self.environment,

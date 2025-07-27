@@ -51,12 +51,16 @@ class MinistryClient:
     
     def __init__(
         self,
+        username: str,
+        password: str,
         client_id: str,
-        client_secret: str,
+        client_secret: str = "",
         environment: str = "development",
         timeout: int = 30,
         max_retries: int = 3
     ):
+        self.username = username
+        self.password = password
         self.client_id = client_id
         self.client_secret = client_secret
         self.environment = environment
@@ -72,7 +76,10 @@ class MinistryClient:
             self.api_url = settings.MINISTRY_API_URL_DEV
         
         # OAuth endpoints
-        self.token_endpoint = urljoin(self.auth_url, "/auth/realms/rut/protocol/openid-connect/token")
+        if environment == "production":
+            self.token_endpoint = urljoin(self.auth_url, "/auth/realms/rut/protocol/openid-connect/token")
+        else:
+            self.token_endpoint = urljoin(self.auth_url, "/auth/realms/rut-stag/protocol/openid-connect/token")
         
         # HTTP client configuration
         self.client_config = {
@@ -114,18 +121,36 @@ class MinistryClient:
     
     async def _authenticate(self) -> Tuple[str, datetime]:
         """
-        Authenticate with Ministry OIDC provider
+        Authenticate with Ministry OIDC provider using username/password
         Returns access token and expiration time
         """
         try:
-            oauth_client = await self._get_oauth_client()
+            # Prepare authentication data for password grant
+            auth_data = {
+                "grant_type": "password",
+                "username": self.username,
+                "password": self.password,
+                "client_id": self.client_id
+            }
             
-            # Request access token using client credentials flow
-            token_response = await oauth_client.fetch_token(
-                self.token_endpoint,
-                grant_type="client_credentials",
-                scope="openid"
-            )
+            # Add client_secret only if it's not empty
+            if self.client_secret:
+                auth_data["client_secret"] = self.client_secret
+            
+            # Make direct HTTP request for token
+            async with httpx.AsyncClient(**self.client_config) as client:
+                response = await client.post(
+                    self.token_endpoint,
+                    data=auth_data,
+                    headers={"Content-Type": "application/x-www-form-urlencoded"}
+                )
+                
+                if response.status_code != 200:
+                    error_text = response.text
+                    logger.error(f"Authentication failed with status {response.status_code}: {error_text}")
+                    raise MinistryAuthenticationError(f"Authentication failed: {error_text}")
+                
+                token_response = response.json()
             
             access_token = token_response.get("access_token")
             expires_in = token_response.get("expires_in", 3600)  # Default 1 hour
@@ -139,9 +164,6 @@ class MinistryClient:
             logger.info("Successfully authenticated with Ministry API")
             return access_token, expires_at
             
-        except OAuth2Error as e:
-            logger.error(f"OAuth2 authentication failed: {e}")
-            raise MinistryAuthenticationError(f"Authentication failed: {e}")
         except httpx.RequestError as e:
             logger.error(f"Network error during authentication: {e}")
             raise MinistryNetworkError(f"Authentication network error: {e}")
