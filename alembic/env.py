@@ -1,17 +1,28 @@
-"""Alembic environment configuration"""
-import asyncio
-from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
-from sqlalchemy.ext.asyncio import AsyncEngine
-from alembic import context
+"""Alembic environment configuration for Costa Rica Electronic Invoice API"""
 import os
 import sys
+from logging.config import fileConfig
+from sqlalchemy import engine_from_config, pool
+from alembic import context
 
 # Add the app directory to the path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from app.core.config import settings
 from app.core.database import Base
+
+# Import all models to ensure they are registered with SQLAlchemy
+from app.models.tenant import Tenant
+from app.models.document import Document
+from app.models.document_detail import DocumentDetail
+from app.models.document_reference import DocumentReference
+from app.models.document_tax import DocumentTax
+from app.models.document_exemption import DocumentExemption
+from app.models.document_other_charge import DocumentOtherCharge
+from app.models.cabys_code import CabysCode
+from app.models.geographic_location import GeographicLocation
+from app.models.units_of_measure import UnitsOfMeasure
+from app.models.receptor_message import ReceptorMessage
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
