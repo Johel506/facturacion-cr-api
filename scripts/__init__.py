@@ -1,0 +1,1 @@
+# Scripts package for Costa Rica Electronic Invoice API seeding utilities
