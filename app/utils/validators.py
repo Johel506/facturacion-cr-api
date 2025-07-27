@@ -496,7 +496,17 @@ def validate_all_business_rules(document_data: Dict[str, Any]) -> Tuple[bool, li
     return len(errors) == 0, errors
 
 
-# Convenience functions for tenant service
+# Convenience functions for XML service and other modules
+def validate_consecutive_number(numero: str) -> bool:
+    """Validate consecutive number format for XML service."""
+    return ConsecutiveNumberValidator.validate_format(numero)
+
+
+def validate_document_key(clave: str) -> bool:
+    """Validate document key format for XML service."""
+    return DocumentKeyValidator.validate_format(clave)
+
+
 def validate_cedula_juridica(cedula: str) -> bool:
     """Validate legal ID format for tenant service."""
     return IdentificationValidator.validate_cedula_juridica(cedula)

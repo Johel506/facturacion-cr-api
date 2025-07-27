@@ -168,8 +168,8 @@
     - Execute: `git add app/services/certificate_service.py app/utils/certificate_utils.py && git commit -m "feat(certificates): implement advanced certificate management system"`
     - _Requirements: 1.2, 3.6, 8.3_
 
-- [ ] 6. Implement XML generation and validation
-  - [ ] 6.1 Create comprehensive UBL 2.1 XML generator for all document types
+- [x] 6. Implement XML generation and validation
+  - [x] 6.1 Create comprehensive UBL 2.1 XML generator for all document types
     - Implement XML structure generation for all 7 document types with proper namespaces
     - Create document header generation (Clave, ProveedorSistemas, CodigoActividad, NumeroConsecutivo, FechaEmision)
     - Implement Emisor and Receptor data generation with all address and contact fields
@@ -181,7 +181,7 @@
     - Execute: `git add app/utils/xml_generator.py app/services/xml_service.py && git commit -m "feat(xml): implement comprehensive UBL 2.1 XML generator for all document types"`
     - _Requirements: 9.1, 11.1, 14.1, 15.1, 17.1_
 
-  - [ ] 6.2 Implement XML digital signature with XAdES-EPES
+  - [x] 6.2 Implement XML digital signature with XAdES-EPES
     - Create P12 certificate loading, parsing, and validation using `cryptography` library
     - Implement XML digital signature using XAdES-EPES standard as required by Ministry (use `xmlsec` or `signxml`)
     - Add signature verification functionality for both tenant and Ministry signatures
@@ -190,7 +190,7 @@
     - Execute: `git add app/utils/xml_signature.py app/services/signature_service.py && git commit -m "feat(xml): implement XML digital signature with XAdES-EPES using xmlsec"`
     - _Requirements: 3.1, 3.2_
 
-  - [ ] 6.3 Add comprehensive XSD schema validation
+  - [x] 6.3 Add comprehensive XSD schema validation
     - Load and cache all official Ministry XSD schemas (v4.4) for all document types
     - Implement XML validation against document-type-specific schemas
     - Create detailed validation error reporting with line numbers and field paths

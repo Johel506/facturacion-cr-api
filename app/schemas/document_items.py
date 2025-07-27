@@ -25,7 +25,7 @@ class CommercialCode(BaseModel):
 
 class PackageComponent(BaseModel):
     """Component of a package/combo product (DetalleSurtido)."""
-    codigo_cabys: str = Field(..., regex=r'^\d{13}$', description="13-digit CABYS code")
+    codigo_cabys: str = Field(..., pattern=r'^\d{13}$', description="13-digit CABYS code")
     cantidad: Decimal = Field(..., gt=0, max_digits=16, decimal_places=3, description="Quantity")
     unidad_medida: str = Field(..., max_length=10, description="Unit of measure")
     descripcion: str = Field(..., min_length=3, max_length=200, description="Product description")
@@ -208,7 +208,7 @@ class DiscountData(BaseModel):
 class DocumentLineItem(BaseModel):
     """Comprehensive document line item with all product fields and tax support."""
     numero_linea: int = Field(..., ge=1, le=1000, description="Line number (1-1000)")
-    codigo_cabys: str = Field(..., regex=r'^\d{13}$', description="13-digit CABYS code")
+    codigo_cabys: str = Field(..., pattern=r'^\d{13}$', description="13-digit CABYS code")
     codigos_comerciales: Optional[List[CommercialCode]] = Field(None, max_items=5)
     cantidad: Decimal = Field(..., gt=0, max_digits=16, decimal_places=3, description="Quantity")
     unidad_medida: str = Field(..., max_length=10, description="Unit of measure")

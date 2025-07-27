@@ -12,8 +12,8 @@ from .enums import ReceptorMessageType, IVACondition
 
 class ReceptorMessageCreate(BaseModel):
     """Model for creating receptor messages (acceptance/rejection)."""
-    clave_documento: str = Field(..., regex=r'^\d{50}$', description="50-digit document key")
-    cedula_emisor: str = Field(..., regex=r'^\d{9,12}$', description="Issuer identification (9-12 digits)")
+    clave_documento: str = Field(..., pattern=r'^\d{50}$', description="50-digit document key")
+    cedula_emisor: str = Field(..., pattern=r'^\d{9,12}$', description="Issuer identification (9-12 digits)")
     fecha_emision: datetime = Field(..., description="Original document emission date")
     mensaje: ReceptorMessageType = Field(..., description="Message type (1=Accepted, 2=Partial, 3=Rejected)")
     detalle_mensaje: Optional[str] = Field(None, max_length=160, description="Rejection details (required for rejection)")
@@ -121,8 +121,8 @@ class ReceptorMessageList(BaseModel):
 
 class ReceptorMessageFilters(BaseModel):
     """Filters for receptor message listing."""
-    clave_documento: Optional[str] = Field(None, regex=r'^\d{50}$')
-    cedula_emisor: Optional[str] = Field(None, regex=r'^\d{9,12}$')
+    clave_documento: Optional[str] = Field(None, pattern=r'^\d{50}$')
+    cedula_emisor: Optional[str] = Field(None, pattern=r'^\d{9,12}$')
     mensaje: Optional[ReceptorMessageType] = None
     enviado: Optional[bool] = None
     fecha_desde: Optional[datetime] = None
