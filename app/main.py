@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.core.database import init_db
 from app.api.v1.api import api_router
+from app.middleware.auth import APIKeyAuthMiddleware
 
 
 @asynccontextmanager
@@ -40,6 +41,9 @@ def create_application() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Add authentication middleware
+    app.add_middleware(APIKeyAuthMiddleware)
 
     # Include API router
     app.include_router(api_router, prefix=settings.API_V1_STR)
