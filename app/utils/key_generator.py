@@ -214,7 +214,8 @@ def parse_document_key(document_key: str) -> Dict[str, str]:
         "terminal": document_key[24:29],
         "document_type": document_key[29:31],
         "sequential": document_key[31:41],
-        "security_code": document_key[41:49]
+        "situation": document_key[41:42],
+        "security_code": document_key[42:50]
     }
 
 

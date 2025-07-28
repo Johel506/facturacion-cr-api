@@ -206,17 +206,17 @@ class DocumentKeyValidator:
     
     @staticmethod
     def validate_format(clave: str) -> bool:
-        """Validate document key format (exactly 50 digits)."""
+        """Validate document key format (50 digits)."""
         return re.match(r'^\d{50}$', clave) is not None
     
     @staticmethod
     def validate_structure(clave: str) -> Tuple[bool, str]:
         """
         Validate document key structure.
-        Format: Country(3) + Day(2) + Month(2) + Year(2) + Issuer(12) + Branch(3) + Terminal(5) + DocType(2) + Sequential(10) + SecurityCode(8)
+        Format: Country(3) + Day(2) + Month(2) + Year(2) + Issuer(12) + Branch(3) + Terminal(5) + DocType(2) + Sequential(10) + Situation(1) + SecurityCode(8)
         """
         if not DocumentKeyValidator.validate_format(clave):
-            return False, "Document key must be exactly 50 digits"
+            return False, "Document key must be 50 digits"
         
         country = clave[:3]
         day = clave[3:5]
@@ -227,7 +227,8 @@ class DocumentKeyValidator:
         terminal = clave[24:29]
         doc_type = clave[29:31]
         sequential = clave[31:41]
-        security_code = clave[41:50]
+        situation = clave[41:42]  # Document situation (1 digit)
+        security_code = clave[42:50]  # Security code (8 digits)
         
         # Validate components
         if country != "506":  # Costa Rica country code
@@ -254,8 +255,12 @@ class DocumentKeyValidator:
         if sequential == "0000000000":
             return False, "Sequential number cannot be all zeros"
         
-        if security_code == "00000000":
-            return False, "Security code cannot be all zeros"
+        # Validate situation code (1 = Normal, 2 = Contingency, 3 = Without internet)
+        if situation not in ["1", "2", "3"]:
+            return False, f"Invalid situation code: {situation} (must be 1, 2, or 3)"
+        
+        if len(security_code) != 8 or security_code == "00000000":
+            return False, "Security code must be exactly 8 digits and cannot be all zeros"
         
         return True, ""
     

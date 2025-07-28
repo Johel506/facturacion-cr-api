@@ -62,7 +62,7 @@ class ConsecutiveService:
         sequential = self._get_next_sequential_number(tenant.id, document_type, branch, terminal)
         
         # Format consecutive number
-        consecutive = f"{branch}{terminal}{document_type.value}{sequential:010d}"
+        consecutive = f"{branch}{terminal}{document_type}{sequential:010d}"
         
         # Validate format
         if not validate_consecutive_number(consecutive):
@@ -81,7 +81,7 @@ class ConsecutiveService:
         Generate 50-character document key following official format
         
         Format: Country(3) + Day(2) + Month(2) + Year(2) + Issuer(12) + 
-                Branch(3) + Terminal(5) + DocType(2) + Sequential(10) + SecurityCode(8)
+                Branch(3) + Terminal(5) + DocType(2) + Sequential(10) + Situation(1) + SecurityCode(8)
         
         Args:
             tenant: Tenant instance
@@ -111,8 +111,8 @@ class ConsecutiveService:
         sequential = consecutive_number[10:20]
         
         # Validate document type matches
-        if doc_type != document_type.value:
-            raise ValueError(f"Document type mismatch: {doc_type} != {document_type.value}")
+        if doc_type != document_type:
+            raise ValueError(f"Document type mismatch: {doc_type} != {document_type}")
         
         # Build document key components
         country = "506"  # Costa Rica country code
@@ -126,8 +126,12 @@ class ConsecutiveService:
         # Generate security code (8 random digits)
         security_code = self._generate_security_code()
         
+        # Generate situation code (1 digit for document status)
+        # 1 = Normal, 2 = Contingency, 3 = Without internet connection
+        situation_code = "1"  # Default to normal situation
+        
         # Assemble document key
-        document_key = f"{country}{day}{month}{year}{issuer_id}{branch}{terminal}{doc_type}{sequential}{security_code}"
+        document_key = f"{country}{day}{month}{year}{issuer_id}{branch}{terminal}{doc_type}{sequential}{situation_code}{security_code}"
         
         # Validate final format
         if not validate_document_key(document_key):
@@ -243,7 +247,7 @@ class ConsecutiveService:
         sequential = self._get_next_sequential_number(tenant_id, document_type, branch, terminal)
         
         # Format consecutive number
-        return f"{branch}{terminal}{document_type.value}{sequential:010d}"
+        return f"{branch}{terminal}{document_type}{sequential:010d}"
     
     def parse_consecutive_number(self, consecutive_number: str) -> Dict[str, str]:
         """
@@ -294,7 +298,8 @@ class ConsecutiveService:
             "terminal": document_key[24:29],
             "document_type": document_key[29:31],
             "sequential": document_key[31:41],
-            "security_code": document_key[41:49]
+            "situation": document_key[41:42],
+            "security_code": document_key[42:50]
         }
     
     def get_consecutive_statistics(
@@ -361,7 +366,7 @@ class ConsecutiveService:
     ) -> int:
         """Get next sequential number for the given parameters"""
         # Build consecutive prefix (branch + terminal + doc_type)
-        prefix = f"{branch}{terminal}{document_type.value}"
+        prefix = f"{branch}{terminal}{document_type}"
         
         # Find the highest sequential number for this prefix
         max_consecutive = self.db.query(func.max(Document.numero_consecutivo))\
