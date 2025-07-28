@@ -78,6 +78,9 @@ class CertificateService:
             if not validation_result.is_valid:
                 return False, None, validation_result.errors
             
+            # Start with validation warnings
+            all_warnings = validation_result.warnings.copy() if validation_result.warnings else []
+            
             # Extract certificate information
             cert_info = validation_result.certificate_info
             
@@ -90,8 +93,9 @@ class CertificateService:
                 )
                 
                 is_compatible, compatibility_issues = P12CertificateManager.check_certificate_compatibility(certificate)
-                if not is_compatible:
-                    return False, None, compatibility_issues
+                # Convert compatibility issues to warnings instead of errors
+                # They shouldn't prevent certificate upload
+                all_warnings.extend(compatibility_issues)
                 
             except Exception as e:
                 return False, None, [f"Failed to parse certificate: {e}"]
@@ -140,7 +144,7 @@ class CertificateService:
                 "fingerprint": fingerprint
             })
             
-            return True, cert_status, validation_result.warnings
+            return True, cert_status, all_warnings
             
         except Exception as e:
             self.db.rollback()

@@ -10,6 +10,13 @@ from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography.hazmat.backends import default_backend
 from cryptography.x509.oid import NameOID, ExtensionOID
 
+# Import pyOpenSSL as fallback for legacy certificates
+try:
+    from OpenSSL import crypto
+    PYOPENSSL_AVAILABLE = True
+except ImportError:
+    PYOPENSSL_AVAILABLE = False
+
 from app.utils.crypto_utils import create_data_integrity_hash
 
 
@@ -44,6 +51,98 @@ class CertificateExpirationInfo(NamedTuple):
     warning_level: str  # 'none', 'info', 'warning', 'critical', 'expired'
 
 
+def _load_p12_with_pyopenssl(certificate_data: bytes, password: str):
+    """
+    Fallback method to load P12 certificates using subprocess with OpenSSL
+    This handles legacy certificates with obsolete algorithms
+    
+    Returns:
+        Tuple[private_key, certificate, additional_certificates] in cryptography format
+    """
+    import subprocess
+    import tempfile
+    import os
+    
+    # Create temporary directory that we control
+    temp_dir = tempfile.mkdtemp()
+    p12_path = os.path.join(temp_dir, "cert.p12")
+    cert_path = os.path.join(temp_dir, "cert.pem")
+    key_path = os.path.join(temp_dir, "key.pem")
+    ca_path = os.path.join(temp_dir, "ca.pem")
+    
+    try:
+        # Write P12 data to file
+        with open(p12_path, 'wb') as f:
+            f.write(certificate_data)
+        
+        # Extract certificate using OpenSSL subprocess
+        cmd_cert = [
+            "openssl", "pkcs12", "-in", p12_path,
+            "-out", cert_path, "-clcerts", "-nokeys",
+            "-passin", f"pass:{password}", "-legacy"
+        ]
+        result = subprocess.run(cmd_cert, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise ValueError(f"Failed to extract certificate: {result.stderr}")
+        
+        # Extract private key
+        cmd_key = [
+            "openssl", "pkcs12", "-in", p12_path,
+            "-out", key_path, "-nocerts", "-nodes",
+            "-passin", f"pass:{password}", "-legacy"
+        ]
+        result = subprocess.run(cmd_key, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise ValueError(f"Failed to extract private key: {result.stderr}")
+        
+        # Extract CA certificates (optional)
+        cmd_ca = [
+            "openssl", "pkcs12", "-in", p12_path,
+            "-out", ca_path, "-cacerts", "-nokeys",
+            "-passin", f"pass:{password}", "-legacy"
+        ]
+        subprocess.run(cmd_ca, capture_output=True, text=True)  # Don't fail if no CA certs
+        
+        # Load extracted components with cryptography
+        with open(cert_path, 'rb') as f:
+            cert_pem = f.read()
+            certificate = x509.load_pem_x509_certificate(cert_pem, backend=default_backend())
+        
+        with open(key_path, 'rb') as f:
+            key_pem = f.read()
+            private_key = serialization.load_pem_private_key(
+                key_pem, password=None, backend=default_backend()
+            )
+        
+        # Load CA certificates if they exist
+        additional_certificates = []
+        if os.path.exists(ca_path) and os.path.getsize(ca_path) > 0:
+            try:
+                with open(ca_path, 'rb') as f:
+                    ca_pem = f.read()
+                    # Try to load multiple certificates from the CA file
+                    for cert_pem in ca_pem.split(b'-----END CERTIFICATE-----'):
+                        if b'-----BEGIN CERTIFICATE-----' in cert_pem:
+                            cert_pem += b'-----END CERTIFICATE-----'
+                            try:
+                                ca_cert = x509.load_pem_x509_certificate(cert_pem, backend=default_backend())
+                                additional_certificates.append(ca_cert)
+                            except:
+                                continue  # Skip invalid certificates
+            except:
+                pass  # CA certificates are optional
+        
+        return private_key, certificate, additional_certificates
+        
+    except Exception as e:
+        raise ValueError(f"OpenSSL subprocess fallback failed: {e}")
+    finally:
+        # Clean up temporary directory and all files
+        import shutil
+        try:
+            shutil.rmtree(temp_dir)
+        except:
+            pass
 class P12CertificateManager:
     """
     P12 certificate validation, parsing, and management utilities
@@ -83,7 +182,7 @@ class P12CertificateManager:
                 errors.append("Certificate data is too small to be valid")
                 return CertificateValidationResult(False, errors, warnings, None)
             
-            # Try to parse P12 certificate
+            # Try to parse P12 certificate with cryptography first
             try:
                 private_key, certificate, additional_certificates = pkcs12.load_key_and_certificates(
                     certificate_data, password.encode('utf-8'), backend=default_backend()
@@ -91,12 +190,29 @@ class P12CertificateManager:
             except ValueError as e:
                 if "invalid" in str(e).lower() or "bad decrypt" in str(e).lower():
                     errors.append("Invalid certificate password")
+                    return CertificateValidationResult(False, errors, warnings, None)
                 else:
-                    errors.append(f"Invalid P12 certificate format: {e}")
-                return CertificateValidationResult(False, errors, warnings, None)
+                    # Try OpenSSL subprocess fallback for legacy certificates
+                    try:
+                        warnings.append("Using OpenSSL subprocess fallback for legacy certificate")
+                        private_key, certificate, additional_certificates = _load_p12_with_pyopenssl(
+                            certificate_data, password
+                        )
+                    except Exception as fallback_e:
+                        errors.append(f"Certificate validation failed with cryptography: {e}")
+                        errors.append(f"OpenSSL subprocess fallback also failed: {fallback_e}")
+                        return CertificateValidationResult(False, errors, warnings, None)
             except Exception as e:
-                errors.append(f"Failed to parse P12 certificate: {e}")
-                return CertificateValidationResult(False, errors, warnings, None)
+                # Try OpenSSL subprocess fallback for any other cryptography errors
+                try:
+                    warnings.append("Using OpenSSL subprocess fallback due to cryptography error")
+                    private_key, certificate, additional_certificates = _load_p12_with_pyopenssl(
+                        certificate_data, password
+                    )
+                except Exception as fallback_e:
+                    errors.append(f"Certificate parsing failed with cryptography: {e}")
+                    errors.append(f"OpenSSL subprocess fallback also failed: {fallback_e}")
+                    return CertificateValidationResult(False, errors, warnings, None)
             
             # Validate certificate exists
             if not certificate:
@@ -115,9 +231,20 @@ class P12CertificateManager:
             
             # Validate certificate dates
             now = datetime.now(timezone.utc)
-            if certificate.not_valid_after < now:
+            
+            # Convert certificate dates to UTC if they're naive
+            not_valid_after = certificate.not_valid_after
+            if not_valid_after.tzinfo is None:
+                not_valid_after = not_valid_after.replace(tzinfo=timezone.utc)
+            
+            not_valid_before = certificate.not_valid_before
+            if not_valid_before.tzinfo is None:
+                not_valid_before = not_valid_before.replace(tzinfo=timezone.utc)
+            
+            # Now we can safely compare
+            if not_valid_after < now:
                 errors.append("Certificate has expired")
-            elif certificate.not_valid_before > now:
+            elif not_valid_before > now:
                 errors.append("Certificate is not yet valid")
             
             # Check expiration warnings

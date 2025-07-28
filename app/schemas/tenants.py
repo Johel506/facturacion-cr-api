@@ -43,15 +43,29 @@ class TenantUpdate(BaseModel):
 
 class CertificateUpload(BaseModel):
     """Model for uploading P12 certificate."""
-    certificado_p12: bytes = Field(..., description="P12 certificate file content")
+    certificado_p12: bytes = Field(..., description="P12 certificate file content (base64 encoded)")
     password_certificado: str = Field(..., min_length=1, max_length=255, description="Certificate password")
 
-    @validator('certificado_p12')
-    def validate_certificate_content(cls, v):
-        """Validate certificate content is not empty."""
-        if not v or len(v) == 0:
-            raise ValueError('Certificate content cannot be empty')
-        return v
+    @validator('certificado_p12', pre=True)
+    def validate_and_decode_certificate(cls, v):
+        """Validate and decode base64 certificate content."""
+        if isinstance(v, str):
+            # If it's a string, assume it's base64 encoded
+            try:
+                import base64
+                decoded = base64.b64decode(v)
+                if len(decoded) == 0:
+                    raise ValueError('Certificate content cannot be empty')
+                return decoded
+            except Exception as e:
+                raise ValueError(f'Invalid base64 certificate data: {e}')
+        elif isinstance(v, bytes):
+            # If it's already bytes, validate it's not empty
+            if len(v) == 0:
+                raise ValueError('Certificate content cannot be empty')
+            return v
+        else:
+            raise ValueError('Certificate must be provided as base64 string or bytes')
 
 
 class CertificateStatus(BaseModel):
