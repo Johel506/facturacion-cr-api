@@ -30,6 +30,7 @@ from app.utils.business_validators_fixed import (
     validate_document_business_rules, validate_document_references,
     validate_line_item_totals
 )
+from app.services.consecutive_service import ConsecutiveService
 
 
 class DocumentService:
@@ -45,6 +46,7 @@ class DocumentService:
     def __init__(self, db: Session):
         self.db = db
         self.tenant_service = TenantService(db)
+        self.consecutive_service = ConsecutiveService(db)
     
     def create_document(
         self, 
@@ -588,32 +590,19 @@ class DocumentService:
                 raise ValueError(f"Invalid CABYS code: {detalle.codigo_cabys}")
     
     def _generate_consecutive_number(self, tenant: Tenant, doc_type: DocumentType) -> str:
-        """Generate consecutive number (placeholder - will be implemented in task 9.2)"""
-        # This is a placeholder implementation
-        # The actual implementation will be in task 9.2
-        import random
-        branch = "001"
-        terminal = "00001"
-        doc_type_code = doc_type.value
-        sequential = f"{random.randint(1, 9999999999):010d}"
-        
-        return f"{branch}{terminal}{doc_type_code}{sequential}"
+        """Generate consecutive number using ConsecutiveService"""
+        return self.consecutive_service.generate_consecutive_number(
+            tenant=tenant,
+            document_type=doc_type
+        )
     
     def _generate_document_key(self, tenant: Tenant, document_data: DocumentCreate, consecutivo: str) -> str:
-        """Generate 50-character document key (placeholder - will be implemented in task 9.2)"""
-        # This is a placeholder implementation
-        # The actual implementation will be in task 9.2
-        import random
-        
-        country = "506"  # Costa Rica
-        now = datetime.now(timezone.utc)
-        day = f"{now.day:02d}"
-        month = f"{now.month:02d}"
-        year = f"{now.year % 100:02d}"
-        issuer = f"{tenant.cedula_juridica:0>12}"[:12]
-        security_code = f"{random.randint(10000000, 99999999)}"
-        
-        return f"{country}{day}{month}{year}{issuer}{consecutivo}{security_code}"
+        """Generate 50-character document key using ConsecutiveService"""
+        return self.consecutive_service.generate_document_key(
+            tenant=tenant,
+            consecutive_number=consecutivo,
+            document_type=document_data.tipo_documento
+        )
     
     def _calculate_document_totals(self, document_data: DocumentCreate) -> Dict[str, Decimal]:
         """Calculate document totals from line items"""
