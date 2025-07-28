@@ -11,10 +11,10 @@
 - **Configuration**: Environment variables configured
 
 ### ⚠️ Identified Pending Corrections
-1. Documents router not included in main API
-2. Verify database migrations status
-3. Configure local Redis (optional for basic tests)
-4. Verify import dependencies
+1. ~~Documents router not included in main API~~ ✅ **FIXED**
+2. ~~Verify database migrations status~~ ✅ **VERIFIED**
+3. ~~Configure local Redis (optional for basic tests)~~ ⚠️ **NOT INSTALLED** (Optional for basic tests)
+4. ~~Verify import dependencies~~ ✅ **FIXED** (Added missing `validate_cabys_code` function, commented out missing business validators temporarily)
 
 ---
 

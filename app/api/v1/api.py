@@ -4,13 +4,14 @@ API router aggregation for v1 endpoints
 from fastapi import APIRouter
 
 # Import endpoint routers
-from app.api.v1.endpoints import tenants, reference_data
+from app.api.v1.endpoints import tenants, reference_data, documents
 from app.api.v1 import cabys
 
 api_router = APIRouter()
 
 # Include endpoint routers
 api_router.include_router(tenants.router, prefix="/tenants")
+api_router.include_router(documents.router, prefix="/documentos")
 
 # Future endpoints (will be uncommented in later tasks)
 # api_router.include_router(auth.router, prefix="/auth")

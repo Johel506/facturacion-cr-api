@@ -518,8 +518,8 @@ def validate_email_format(email: str) -> bool:
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(email_pattern, email) is not None
 
-def
- validate_identification_number(tipo: str, numero: str) -> Tuple[bool, Optional[str]]:
+
+def validate_identification_number(tipo: str, numero: str) -> Tuple[bool, Optional[str]]:
     """
     Validate identification number based on type code.
     
@@ -547,3 +547,18 @@ def
         return False, f"Invalid identification type: {tipo}. Valid types: 01-06"
     
     return IdentificationValidator.validate_identification(tipo_map[tipo], numero)
+
+
+def validate_cabys_code(codigo: str) -> bool:
+    """
+    Validate CABYS code format.
+    CABYS codes are 13 digits long.
+    """
+    if not codigo or not isinstance(codigo, str):
+        return False
+    
+    # Remove any spaces or hyphens
+    codigo = codigo.replace(" ", "").replace("-", "")
+    
+    # Should be exactly 13 digits
+    return len(codigo) == 13 and codigo.isdigit()

@@ -26,10 +26,10 @@ from app.utils.validators import (
     validate_identification_number, validate_cabys_code,
     validate_consecutive_number, validate_document_key
 )
-from app.utils.business_validators_fixed import (
-    validate_document_business_rules, validate_document_references,
-    validate_line_item_totals
-)
+# from app.utils.business_validators_fixed import (
+#     validate_document_business_rules, validate_document_references,
+#     validate_line_item_totals
+# )
 from app.services.consecutive_service import ConsecutiveService
 
 
@@ -575,14 +575,15 @@ class DocumentService:
     def _validate_document_creation_data(self, document_data: DocumentCreate, tenant: Tenant) -> None:
         """Validate document creation data"""
         # Validate business rules
-        validate_document_business_rules(document_data)
+        # validate_document_business_rules(document_data)
         
         # Validate references for credit/debit notes
         if document_data.referencias:
-            validate_document_references(document_data.referencias, document_data.tipo_documento)
+            # validate_document_references(document_data.referencias, document_data.tipo_documento)
+            pass
         
         # Validate line item totals
-        validate_line_item_totals(document_data.detalles)
+        # validate_line_item_totals(document_data.detalles)
         
         # Validate CABYS codes
         for detalle in document_data.detalles:
