@@ -517,3 +517,33 @@ def validate_email_format(email: str) -> bool:
     import re
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(email_pattern, email) is not None
+
+def
+ validate_identification_number(tipo: str, numero: str) -> Tuple[bool, Optional[str]]:
+    """
+    Validate identification number based on type code.
+    
+    Args:
+        tipo: Identification type code (01-06)
+        numero: Identification number
+        
+    Returns:
+        Tuple of (is_valid, error_message)
+    """
+    if not tipo or not numero:
+        return False, "Both identification type and number are required"
+    
+    # Map string codes to enum values
+    tipo_map = {
+        "01": IdentificationType.CEDULA_FISICA,
+        "02": IdentificationType.CEDULA_JURIDICA,
+        "03": IdentificationType.DIMEX,
+        "04": IdentificationType.NITE,
+        "05": IdentificationType.EXTRANJERO_NO_DOMICILIADO,
+        "06": IdentificationType.NO_CONTRIBUYENTE
+    }
+    
+    if tipo not in tipo_map:
+        return False, f"Invalid identification type: {tipo}. Valid types: 01-06"
+    
+    return IdentificationValidator.validate_identification(tipo_map[tipo], numero)

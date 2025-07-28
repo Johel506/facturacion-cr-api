@@ -8,7 +8,7 @@ invoicing system.
 Requirements: 11.2, 11.3, 17.1
 """
 from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, HTTPException, Query, Depends, Path
 from pydantic import BaseModel, Field, validator
 
 from app.services.cabys_service import cabys_service
@@ -106,9 +106,9 @@ async def search_cabys_codes(
         )
 
 
-@router.get("/code/{codigo}", response_model=CabysCodeResponse)
+@router.get("/{codigo}", response_model=CabysCodeResponse)
 async def get_cabys_code(
-    codigo: str = Field(..., description="13-digit CABYS code"),
+    codigo: str = Path(..., description="13-digit CABYS code"),
     tenant = Depends(get_current_tenant)
 ):
     """
@@ -139,7 +139,7 @@ async def get_cabys_code(
 
 @router.get("/validate/{codigo}", response_model=CabysValidationResponse)
 async def validate_cabys_code(
-    codigo: str = Field(..., description="13-digit CABYS code to validate"),
+    codigo: str = Path(..., description="13-digit CABYS code to validate"),
     tenant = Depends(get_current_tenant)
 ):
     """
@@ -171,7 +171,7 @@ async def validate_cabys_code(
 
 @router.get("/prefix/{prefix}", response_model=List[CabysCodeResponse])
 async def search_by_prefix(
-    prefix: str = Field(..., description="Code prefix to search for"),
+    prefix: str = Path(..., description="Code prefix to search for"),
     limit: int = Query(20, description="Maximum number of results", ge=1, le=100),
     only_active: bool = Query(True, description="Include only active codes"),
     tenant = Depends(get_current_tenant)
@@ -200,7 +200,7 @@ async def search_by_prefix(
 
 @router.get("/category/{categoria}", response_model=List[CabysCodeResponse])
 async def search_by_category(
-    categoria: str = Field(..., description="Category name to search for"),
+    categoria: str = Path(..., description="Category name to search for"),
     nivel: int = Query(1, description="Category level", ge=1, le=4),
     limit: int = Query(50, description="Maximum number of results", ge=1, le=100),
     only_active: bool = Query(True, description="Include only active codes"),
