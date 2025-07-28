@@ -44,10 +44,8 @@ class CabysCode(Base):
     # Product/service information
     descripcion = Column(Text, nullable=False, 
                         comment="Product or service description in Spanish")
-    descripcion_ingles = Column(Text, nullable=True,
-                               comment="Product or service description in English")
     
-    # Classification hierarchy (8 levels as per official CABYS structure)
+    # Classification hierarchy (4 levels as per migration)
     categoria_nivel_1 = Column(String(255), nullable=True,
                               comment="Level 1 category (broadest classification)")
     categoria_nivel_2 = Column(String(255), nullable=True,
@@ -56,26 +54,12 @@ class CabysCode(Base):
                               comment="Level 3 category (detailed classification)")
     categoria_nivel_4 = Column(String(255), nullable=True,
                               comment="Level 4 category")
-    categoria_nivel_5 = Column(String(255), nullable=True,
-                              comment="Level 5 category")
-    categoria_nivel_6 = Column(String(255), nullable=True,
-                              comment="Level 6 category")
-    categoria_nivel_7 = Column(String(255), nullable=True,
-                              comment="Level 7 category")
-    categoria_nivel_8 = Column(String(255), nullable=True,
-                              comment="Level 8 category (most specific classification)")
     
     # Tax information
     impuesto_iva = Column(Numeric(4, 2), nullable=False, default=Decimal('13.00'),
                          comment="Default IVA tax rate percentage for this product/service")
     exento_iva = Column(Boolean, nullable=False, default=False,
                        comment="Whether this product/service is IVA exempt")
-    
-    # Additional tax classifications
-    aplica_impuesto_selectivo = Column(Boolean, nullable=False, default=False,
-                                     comment="Whether selective consumption tax applies")
-    aplica_impuesto_especifico = Column(Boolean, nullable=False, default=False,
-                                      comment="Whether specific tax applies")
     
     # Status and versioning
     activo = Column(Boolean, nullable=False, default=True,
@@ -92,10 +76,6 @@ class CabysCode(Base):
                         comment="Number of times this code has been used in documents")
     ultimo_uso = Column(DateTime(timezone=True), nullable=True,
                        comment="Last time this code was used in a document")
-    
-    # Full-text search vector (PostgreSQL specific)
-    search_vector = Column(TSVECTOR, nullable=True,
-                          comment="Full-text search vector for efficient searching")
     
     # Audit fields
     created_at = Column(DateTime(timezone=True), nullable=False,
@@ -141,15 +121,12 @@ class CabysCode(Base):
         Index("idx_cabys_activo", "activo"),
         Index("idx_cabys_descripcion_gin", "descripcion", postgresql_using="gin",
               postgresql_ops={"descripcion": "gin_trgm_ops"}),
-        Index("idx_cabys_search_vector", "search_vector", postgresql_using="gin"),
+
         Index("idx_cabys_categoria_1", "categoria_nivel_1"),
         Index("idx_cabys_categoria_2", "categoria_nivel_2"),
         Index("idx_cabys_categoria_3", "categoria_nivel_3"),
         Index("idx_cabys_categoria_4", "categoria_nivel_4"),
-        Index("idx_cabys_categoria_5", "categoria_nivel_5"),
-        Index("idx_cabys_categoria_6", "categoria_nivel_6"),
-        Index("idx_cabys_categoria_7", "categoria_nivel_7"),
-        Index("idx_cabys_categoria_8", "categoria_nivel_8"),
+
         Index("idx_cabys_impuesto_iva", "impuesto_iva"),
         Index("idx_cabys_exento_iva", "exento_iva"),
         Index("idx_cabys_veces_usado", "veces_usado"),
@@ -166,9 +143,6 @@ class CabysCode(Base):
         # Full-text search indexes
         Index("idx_cabys_descripcion_tsvector", 
               text("to_tsvector('spanish', descripcion)"),
-              postgresql_using="gin"),
-        Index("idx_cabys_descripcion_ingles_tsvector",
-              text("to_tsvector('english', COALESCE(descripcion_ingles, ''))"),
               postgresql_using="gin"),
     )
     
@@ -202,11 +176,7 @@ class CabysCode(Base):
             self.categoria_nivel_1,
             self.categoria_nivel_2,
             self.categoria_nivel_3,
-            self.categoria_nivel_4,
-            self.categoria_nivel_5,
-            self.categoria_nivel_6,
-            self.categoria_nivel_7,
-            self.categoria_nivel_8
+            self.categoria_nivel_4
         ]
         return " > ".join(filter(None, categorias))
     
@@ -240,8 +210,6 @@ class CabysCode(Base):
             'impuesto_iva_porcentaje': float(self.impuesto_iva),
             'impuesto_iva_decimal': float(self.impuesto_iva_decimal),
             'exento_iva': self.exento_iva,
-            'aplica_impuesto_selectivo': self.aplica_impuesto_selectivo,
-            'aplica_impuesto_especifico': self.aplica_impuesto_especifico,
             'descripcion': self.descripcion,
             'categoria': self.categoria_completa
         }
@@ -336,16 +304,12 @@ class CabysCode(Base):
         if only_active:
             base_query = base_query.filter(cls.activo == True)
         
-        # Select appropriate category level (1-8)
+        # Select appropriate category level (1-4)
         category_field = {
             1: cls.categoria_nivel_1,
             2: cls.categoria_nivel_2,
             3: cls.categoria_nivel_3,
-            4: cls.categoria_nivel_4,
-            5: cls.categoria_nivel_5,
-            6: cls.categoria_nivel_6,
-            7: cls.categoria_nivel_7,
-            8: cls.categoria_nivel_8
+            4: cls.categoria_nivel_4
         }.get(nivel, cls.categoria_nivel_1)
         
         results = base_query.filter(

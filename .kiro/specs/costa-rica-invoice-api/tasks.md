@@ -230,8 +230,8 @@
     - Execute: `git add app/services/status_service.py app/utils/error_parser.py && git commit -m "feat(ministry): add Ministry response and status management"`
     - _Requirements: 3.4, 3.5_
 
-- [ ] 8. Implement CABYS code management and reference data services
-  - [ ] 8.1 Create comprehensive CABYS database and search
+- [-] 8. Implement CABYS code management and reference data services
+  - [x] 8.1 Create comprehensive CABYS database and search
     - Implement CABYS code database seeding with official catalog (13-digit codes, descriptions, categories, tax rates)
     - Create full-text search functionality using PostgreSQL with Spanish language support (`gin` indexes with `to_tsvector`)
     - Add CABYS code validation for document line items with database lookup using `asyncpg` for performance

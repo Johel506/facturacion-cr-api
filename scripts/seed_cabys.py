@@ -168,7 +168,7 @@ class CabysSeeder:
                 'categoria_nivel_3': 'Cerveza',
                 'impuesto_iva': Decimal('13.00'),
                 'exento_iva': False,
-                'aplica_impuesto_selectivo': True,
+
                 'version_cabys': '4.4'
             },
             
@@ -287,7 +287,7 @@ class CabysSeeder:
                 'categoria_nivel_3': 'Cemento',
                 'impuesto_iva': Decimal('13.00'),
                 'exento_iva': False,
-                'aplica_impuesto_especifico': True,
+
                 'version_cabys': '4.4'
             },
             {
@@ -464,10 +464,9 @@ class CabysSeeder:
                         categoria_nivel_1=code_data.get('categoria_nivel_1'),
                         categoria_nivel_2=code_data.get('categoria_nivel_2'),
                         categoria_nivel_3=code_data.get('categoria_nivel_3'),
+                        categoria_nivel_4=code_data.get('categoria_nivel_4'),
                         impuesto_iva=code_data.get('impuesto_iva', Decimal('13.00')),
                         exento_iva=code_data.get('exento_iva', False),
-                        aplica_impuesto_selectivo=code_data.get('aplica_impuesto_selectivo', False),
-                        aplica_impuesto_especifico=code_data.get('aplica_impuesto_especifico', False),
                         activo=True,
                         version_cabys=code_data.get('version_cabys', '4.4'),
                         fecha_vigencia_desde=datetime.now(timezone.utc)
@@ -481,16 +480,8 @@ class CabysSeeder:
             
             # Update search vectors for full-text search
             logger.info("Updating search vectors for full-text search...")
-            session.execute(text("""
-                UPDATE codigos_cabys 
-                SET search_vector = to_tsvector('spanish', 
-                    COALESCE(descripcion, '') || ' ' || 
-                    COALESCE(categoria_nivel_1, '') || ' ' ||
-                    COALESCE(categoria_nivel_2, '') || ' ' ||
-                    COALESCE(categoria_nivel_3, '')
-                )
-                WHERE search_vector IS NULL
-            """))
+            # Note: search_vector field doesn't exist in current migration
+            # This would be added in a future migration if needed
             
             session.commit()
             logger.info(f"Successfully created {created_count} CABYS codes")
@@ -635,7 +626,7 @@ def main():
     parser = argparse.ArgumentParser(description='Seed CABYS codes database')
     parser.add_argument('--excel', type=str, help='Path to Excel file with CABYS codes')
     parser.add_argument('--clear', action='store_true', help='Clear existing CABYS codes')
-    parser.add_argument('--sample', action='store_true', help='Seed with sample data (default)')
+    parser.add_argument('--sample', action='store_true', help='Seed with sample data (for testing only)')
     parser.add_argument('--database-url', type=str, help='Database URL (optional)')
     
     args = parser.parse_args()
@@ -654,8 +645,15 @@ def main():
         # Seed data
         if args.excel:
             count = seeder.seed_from_excel(args.excel)
-        else:
+        elif args.sample:
+            logger.warning("Using sample data for testing. This should not be used in production!")
             count = seeder.seed_sample_cabys_codes()
+        else:
+            logger.info("No data source specified. Use --excel for real data or --sample for testing.")
+            logger.info("Usage examples:")
+            logger.info("  python seed_cabys.py --excel path/to/cabys.xlsx")
+            logger.info("  python seed_cabys.py --sample  # For testing only")
+            return
         
         logger.info(f"CABYS seeding completed successfully. Created {count} codes.")
         

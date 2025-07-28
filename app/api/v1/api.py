@@ -5,6 +5,7 @@ from fastapi import APIRouter
 
 # Import endpoint routers
 from app.api.v1.endpoints import tenants
+from app.api.v1 import cabys
 
 api_router = APIRouter()
 
@@ -14,7 +15,7 @@ api_router.include_router(tenants.router, prefix="/tenants", tags=["tenants"])
 # Future endpoints (will be uncommented in later tasks)
 # api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
 # api_router.include_router(invoices.router, prefix="/facturas", tags=["invoices"])
-# api_router.include_router(cabys.router, prefix="/cabys", tags=["cabys"])
+api_router.include_router(cabys.router, prefix="/cabys", tags=["cabys"])
 # api_router.include_router(utils.router, prefix="/utils", tags=["utilities"])
 
 
