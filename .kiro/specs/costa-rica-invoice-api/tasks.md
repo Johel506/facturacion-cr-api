@@ -250,7 +250,7 @@
     - Execute: `git add app/api/v1/endpoints/cabys.py app/api/v1/endpoints/reference_data.py && git commit -m "feat(api): add comprehensive CABYS and reference data API endpoints"`
     - _Requirements: 11.2, 12.1, 13.1, 17.1_
 
-- [-] 9. Implement comprehensive document management service
+- [x] 9. Implement comprehensive document management service
   - [x] 9.1 Create document CRUD operations for all types
     - Implement document creation with complete validation for all 7 document types
     - Add document retrieval with tenant isolation and type-specific formatting
@@ -270,7 +270,7 @@
     - Execute: `git add app/services/consecutive_service.py app/utils/key_generator.py && git commit -m "feat(documents): implement consecutive number and document key management"`
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
 
-  - [-] 9.3 Add document relationship management
+  - [x] 9.3 Add document relationship management
     - Implement document reference creation and validation
     - Create document correction and cancellation workflows
     - Add credit/debit note relationship tracking
