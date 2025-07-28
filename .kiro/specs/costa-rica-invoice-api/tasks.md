@@ -251,7 +251,7 @@
     - _Requirements: 11.2, 12.1, 13.1, 17.1_
 
 - [-] 9. Implement comprehensive document management service
-  - [-] 9.1 Create document CRUD operations for all types
+  - [x] 9.1 Create document CRUD operations for all types
     - Implement document creation with complete validation for all 7 document types
     - Add document retrieval with tenant isolation and type-specific formatting
     - Create document listing with advanced pagination, filtering, and sorting
@@ -260,7 +260,7 @@
     - Execute: `git add app/services/document_service.py app/api/v1/endpoints/documents.py && git commit -m "feat(documents): create comprehensive document CRUD operations"`
     - _Requirements: 9.1, 5.1, 5.2, 5.3, 1.5_
 
-  - [ ] 9.2 Add consecutive number and document key management
+  - [x] 9.2 Add consecutive number and document key management
     - Implement automatic consecutive number generation with proper format (20 digits)
     - Create branch and point-of-sale configuration per tenant
     - Add consecutive number validation and uniqueness per document type
@@ -270,7 +270,7 @@
     - Execute: `git add app/services/consecutive_service.py app/utils/key_generator.py && git commit -m "feat(documents): implement consecutive number and document key management"`
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
 
-  - [ ] 9.3 Add document relationship management
+  - [-] 9.3 Add document relationship management
     - Implement document reference creation and validation
     - Create document correction and cancellation workflows
     - Add credit/debit note relationship tracking
