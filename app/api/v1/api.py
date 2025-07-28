@@ -10,14 +10,14 @@ from app.api.v1 import cabys
 api_router = APIRouter()
 
 # Include endpoint routers
-api_router.include_router(tenants.router, prefix="/tenants", tags=["tenants"])
+api_router.include_router(tenants.router, prefix="/tenants")
 
 # Future endpoints (will be uncommented in later tasks)
-# api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
-# api_router.include_router(invoices.router, prefix="/facturas", tags=["invoices"])
-api_router.include_router(cabys.router, tags=["cabys"])
-api_router.include_router(reference_data.router, tags=["reference-data"])
-# api_router.include_router(utils.router, prefix="/utils", tags=["utilities"])
+# api_router.include_router(auth.router, prefix="/auth")
+# api_router.include_router(invoices.router, prefix="/facturas")
+api_router.include_router(cabys.router)
+api_router.include_router(reference_data.router)
+# api_router.include_router(utils.router, prefix="/utils")
 
 
 @api_router.get("/")

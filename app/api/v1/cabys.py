@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field, validator
 from app.services.cabys_service import cabys_service
 from app.core.auth import get_current_tenant
 
-router = APIRouter(prefix="/cabys", tags=["CABYS Codes"])
+router = APIRouter(prefix="/cabys", tags=["CABYS"])
 
 
 class CabysCodeResponse(BaseModel):

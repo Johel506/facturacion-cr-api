@@ -21,7 +21,7 @@ from app.schemas.base import BaseResponse, PaginationData
 from app.models.tenant import Tenant
 
 
-router = APIRouter()
+router = APIRouter(tags=["Tenants"])
 
 
 @router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
