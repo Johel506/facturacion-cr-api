@@ -240,7 +240,7 @@
     - Execute: `git add app/services/cabys_service.py app/utils/cabys_search.py && git commit -m "feat(cabys): create comprehensive CABYS database and search with PostgreSQL gin indexes"`
     - _Requirements: 11.2, 11.3, 17.1_
 
-  - [ ] 8.2 Add comprehensive CABYS and reference data API endpoints
+  - [x] 8.2 Add comprehensive CABYS and reference data API endpoints
     - Create GET /v1/cabys/search endpoint with pagination and filtering
     - Implement GET /v1/cabys/{codigo} for exact code lookup
     - Add category-based filtering and hierarchical browsing
@@ -250,8 +250,8 @@
     - Execute: `git add app/api/v1/endpoints/cabys.py app/api/v1/endpoints/reference_data.py && git commit -m "feat(api): add comprehensive CABYS and reference data API endpoints"`
     - _Requirements: 11.2, 12.1, 13.1, 17.1_
 
-- [ ] 9. Implement comprehensive document management service
-  - [ ] 9.1 Create document CRUD operations for all types
+- [-] 9. Implement comprehensive document management service
+  - [-] 9.1 Create document CRUD operations for all types
     - Implement document creation with complete validation for all 7 document types
     - Add document retrieval with tenant isolation and type-specific formatting
     - Create document listing with advanced pagination, filtering, and sorting
