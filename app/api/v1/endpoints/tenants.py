@@ -40,11 +40,23 @@ def create_tenant(
     try:
         tenant_response, api_key = create_tenant_with_validation(tenant_data, db)
         
+        # Crear respuesta más defensiva
+        response_data = {
+            "id": str(tenant_response.id),
+            "nombre_empresa": tenant_response.nombre_empresa,
+            "cedula_juridica": tenant_response.cedula_juridica,
+            "email_contacto": tenant_response.email_contacto,
+            "plan": tenant_response.plan,
+            "activo": tenant_response.activo,
+            "limite_facturas_mes": tenant_response.limite_facturas_mes,
+            "created_at": tenant_response.created_at.isoformat() if tenant_response.created_at else None
+        }
+        
         return {
             "success": True,
             "message": "Tenant created successfully",
             "data": {
-                "tenant": tenant_response.dict(),
+                "tenant": response_data,
                 "api_key": api_key
             }
         }
@@ -55,6 +67,11 @@ def create_tenant(
             detail=str(e)
         )
     except Exception as e:
+        # Log the full error for debugging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error creating tenant: {str(e)}", exc_info=True)
+        
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create tenant: {str(e)}"

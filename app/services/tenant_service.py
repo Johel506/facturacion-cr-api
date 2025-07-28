@@ -5,7 +5,7 @@ Handles tenant CRUD operations, plan management, usage tracking, and statistics.
 import re
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List, Dict, Any, Tuple
-from uuid import UUID
+from uuid import UUID, uuid4
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, or_
 from sqlalchemy.exc import IntegrityError
@@ -57,7 +57,7 @@ class TenantService:
         self._validate_tenant_creation_data(tenant_data)
         
         # Generate secure API key
-        tenant_id_str = str(UUID())  # Generate temporary UUID for key generation
+        tenant_id_str = str(uuid4())  # Generate temporary UUID for key generation
         api_key, api_key_hash = generate_tenant_api_key(tenant_id_str)
         
         # Get plan limits
@@ -84,10 +84,10 @@ class TenantService:
             self.db.refresh(tenant)
             
             # Log tenant creation
-            self._log_tenant_activity(tenant.id, "tenant_created", {
-                "plan": tenant_data.plan,
-                "email": tenant_data.email_contacto
-            })
+            # self._log_tenant_activity(tenant.id, "tenant_created", {
+            #     "plan": tenant_data.plan,
+            #     "email": tenant_data.email_contacto
+            # })
             
             return tenant, api_key  # Return plain API key for client
             
@@ -529,8 +529,9 @@ class TenantService:
     def _validate_tenant_creation_data(self, tenant_data: TenantCreate) -> None:
         """Validate tenant creation data with enhanced validation"""
         # Validate legal ID format
-        if not validate_cedula_juridica(tenant_data.cedula_juridica):
-            raise ValueError("Invalid legal identification format")
+        is_valid, error_msg = validate_cedula_juridica(tenant_data.cedula_juridica)
+        if not is_valid:
+            raise ValueError(f"Invalid legal identification format: {error_msg}")
         
         # Check if tenant already exists
         existing_tenant = self.get_tenant_by_cedula(tenant_data.cedula_juridica)
@@ -658,7 +659,7 @@ def create_tenant_with_validation(tenant_data: TenantCreate, db: Session) -> Tup
     service = TenantService(db)
     tenant, api_key = service.create_tenant(tenant_data)
     
-    # Convert to response model
+    # Convert to response model with safer property access
     response = TenantResponse(
         id=tenant.id,
         nombre_empresa=tenant.nombre_empresa,
@@ -668,8 +669,8 @@ def create_tenant_with_validation(tenant_data: TenantCreate, db: Session) -> Tup
         activo=tenant.activo,
         limite_facturas_mes=tenant.limite_facturas_mes,
         facturas_usadas_mes=tenant.facturas_usadas_mes,
-        tiene_certificado=tenant.has_certificate,
-        certificado_valido=tenant.has_certificate and not tenant.certificate_expired,
+        tiene_certificado=tenant.certificado_p12 is not None,
+        certificado_valido=False,  # Safe default since no certificate is uploaded during creation
         certificado_vence=tenant.certificado_expires_at,
         created_at=tenant.created_at,
         updated_at=tenant.updated_at

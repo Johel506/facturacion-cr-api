@@ -43,7 +43,7 @@ class Tenant(Base):
     distrito = Column(Integer, nullable=True, comment="District code")
     
     # Authentication (Requirement 1.3)
-    api_key = Column(String(64), nullable=False, unique=True, index=True,
+    api_key = Column(String(255), nullable=False, unique=True, index=True,
                     comment="Cryptographically secure API key (min 32 chars)")
     api_key_created_at = Column(DateTime(timezone=True), nullable=False, 
                                default=lambda: datetime.now(timezone.utc),
