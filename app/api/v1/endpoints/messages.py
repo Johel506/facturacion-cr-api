@@ -20,7 +20,7 @@ from app.services.receptor_message_service import ReceptorMessageService
 from app.utils.error_responses import ValidationError, NotFoundError
 
 router = APIRouter(
-    prefix="/receptor-messages",
+    prefix="/mensajes-receptor",
     tags=["Receptor Messages"],
     responses={404: {"description": "Not found"}}
 )
