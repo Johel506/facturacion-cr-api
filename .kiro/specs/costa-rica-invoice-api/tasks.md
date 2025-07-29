@@ -299,7 +299,7 @@
     - Execute: `git add app/api/v1/endpoints/tenants.py && git commit -m "feat(api): create comprehensive tenant management endpoints"`
     - _Requirements: 1.1, 1.2, 1.4, 1.5_
 
-  - [ ] 10.3 Implement comprehensive document endpoints for all types
+  - [x] 10.3 Implement comprehensive document endpoints for all types
     - Create POST /v1/documentos for document creation supporting all 7 types
     - Add GET /v1/documentos/{id} for document retrieval with full details
     - Implement GET /v1/documentos for document listing with advanced filters
@@ -312,7 +312,7 @@
     - Execute: `git add app/api/v1/endpoints/documents.py && git commit -m "feat(api): implement comprehensive document endpoints for all types"`
     - _Requirements: 9.1, 5.1, 5.2, 5.3, 5.4, 5.5, 15.1_
 
-  - [ ] 10.4 Create receptor message and utility endpoints
+  - [-] 10.4 Create receptor message and utility endpoints
     - Implement POST /v1/mensajes-receptor for acceptance/rejection messages
     - Add GET /v1/mensajes-receptor/{id} for message retrieval and listing
     - Implement POST /v1/mensajes-receptor/{id}/enviar for message submission
