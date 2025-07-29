@@ -4,8 +4,11 @@
 import os
 import sys
 
-# Set the DATABASE_URL environment variable directly for this script
-os.environ["DATABASE_URL"] = "postgresql://postgres.ldljgbocrbfgjabbreec:deiRl95djSAX16TvNuoCgu51hE2tRy6LMqtf2kDbw2MdPqPJP4LGI0L54HWC6LJz@aws-0-us-west-1.pooler.supabase.com:6543/postgres"
+# Load DATABASE_URL from environment variables
+from dotenv import load_dotenv
+load_dotenv()
+
+# DATABASE_URL should be set in .env file
 
 from app.core.database import SessionLocal
 from sqlalchemy import text
