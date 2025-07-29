@@ -162,3 +162,14 @@ temp/
 
 # Costa Rica official documentation (keep local copy, don't commit to repo)
 Estructuras XML y Anexos Version 4.4/
+
+# Development and debugging scripts
+debug_*.py
+check_*.py
+test_*.py
+upload_*.py
+convert_*.py
+create_*.py
+get_*.py
+fix_*.py
+reset_*.py
