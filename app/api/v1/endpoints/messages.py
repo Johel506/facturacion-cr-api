@@ -20,7 +20,7 @@ from app.services.receptor_message_service import ReceptorMessageService
 from app.utils.error_responses import ValidationError, NotFoundError
 
 router = APIRouter(
-    prefix="/mensajes-receptor",
+    prefix="/receptor-messages",
     tags=["Receptor Messages"],
     responses={404: {"description": "Not found"}}
 )
@@ -185,7 +185,7 @@ async def list_receptor_messages(
 
 
 @router.post(
-    "/{message_id}/enviar",
+    "/{message_id}/send",
     response_model=ReceptorMessageResponse,
     summary="Send receptor message",
     description="Send receptor message to Ministry of Finance"
