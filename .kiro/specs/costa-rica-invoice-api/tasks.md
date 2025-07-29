@@ -312,7 +312,7 @@
     - Execute: `git add app/api/v1/endpoints/documents.py && git commit -m "feat(api): implement comprehensive document endpoints for all types"`
     - _Requirements: 9.1, 5.1, 5.2, 5.3, 5.4, 5.5, 15.1_
 
-  - [-] 10.4 Create receptor message and utility endpoints
+  - [x] 10.4 Create receptor message and utility endpoints
     - Implement POST /v1/mensajes-receptor for acceptance/rejection messages
     - Add GET /v1/mensajes-receptor/{id} for message retrieval and listing
     - Implement POST /v1/mensajes-receptor/{id}/enviar for message submission
@@ -321,7 +321,7 @@
     - Execute: `git add app/api/v1/endpoints/messages.py app/api/v1/endpoints/utils.py && git commit -m "feat(api): create receptor message and utility endpoints"`
     - _Requirements: 16.1, 16.2, 16.3, 16.4, 16.5, 16.6_
 
-  - [ ] 10.5 Create reference data endpoints
+  - [-] 10.5 Create reference data endpoints
     - Implement GET /v1/cabys/search for CABYS code search with pagination
     - Add GET /v1/cabys/{codigo} for exact CABYS code lookup
     - Create GET /v1/ubicaciones endpoints for provinces, cantons, and districts

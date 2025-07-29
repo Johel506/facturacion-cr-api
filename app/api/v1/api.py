@@ -23,7 +23,11 @@ api_router.include_router(utils.router)
 
 # Reference data endpoints
 api_router.include_router(cabys.router)
-api_router.include_router(reference_data.router)
+api_router.include_router(reference_data.ubicaciones_router)
+api_router.include_router(reference_data.unidades_router)
+api_router.include_router(reference_data.monedas_router)
+api_router.include_router(reference_data.consecutivo_router)
+api_router.include_router(reference_data.utils_router)  # For utility endpoints
 
 
 @api_router.get("/")

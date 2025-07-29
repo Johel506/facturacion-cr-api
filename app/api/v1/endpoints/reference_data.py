@@ -21,7 +21,15 @@ from app.models.tenant import Tenant
 from app.schemas.enums import DocumentType
 from app.services.consecutive_service import ConsecutiveService
 
-router = APIRouter(prefix="/reference", tags=["Reference Data"])
+# Create separate routers for different reference data types
+ubicaciones_router = APIRouter(prefix="/ubicaciones", tags=["Geographic Locations"])
+unidades_router = APIRouter(prefix="/unidades-medida", tags=["Units of Measure"])
+monedas_router = APIRouter(prefix="/monedas", tags=["Currencies"])
+consecutivo_router = APIRouter(prefix="/consecutivo", tags=["Consecutive Numbers"])
+utils_router = APIRouter(tags=["Reference Data Utils"])
+
+# Main router for backwards compatibility
+router = APIRouter(tags=["Reference Data"])
 
 
 # Response Models
@@ -126,7 +134,7 @@ class ConsecutiveNumberResponse(BaseModel):
 
 
 # Geographic Location Endpoints
-@router.get("/ubicaciones/provincias", response_model=List[ProvinceResponse])
+@ubicaciones_router.get("/provincias", response_model=List[ProvinceResponse])
 async def get_provinces(
     include_cantons: bool = Query(False, description="Include cantons in response"),
     tenant = Depends(get_current_tenant),
@@ -172,7 +180,7 @@ async def get_provinces(
         )
 
 
-@router.get("/ubicaciones/provincias/{provincia_id}/cantones", response_model=List[CantonResponse])
+@ubicaciones_router.get("/provincias/{provincia_id}/cantones", response_model=List[CantonResponse])
 async def get_cantons_by_province(
     provincia_id: int = Path(..., description="Province code (1-7)", ge=1, le=7),
     include_districts: bool = Query(False, description="Include districts in response"),
@@ -232,7 +240,7 @@ async def get_cantons_by_province(
         )
 
 
-@router.get("/ubicaciones/provincias/{provincia_id}/cantones/{canton_id}/distritos", response_model=List[DistrictResponse])
+@ubicaciones_router.get("/provincias/{provincia_id}/cantones/{canton_id}/distritos", response_model=List[DistrictResponse])
 async def get_districts_by_canton(
     provincia_id: int = Path(..., description="Province code (1-7)", ge=1, le=7),
     canton_id: int = Path(..., description="Canton code (1-99)", ge=1, le=99),
@@ -278,7 +286,7 @@ async def get_districts_by_canton(
         )
 
 
-@router.get("/ubicaciones/search", response_model=List[GeographicLocationResponse])
+@ubicaciones_router.get("/search", response_model=List[GeographicLocationResponse])
 async def search_locations(
     q: str = Query(..., description="Search query", min_length=2),
     limit: int = Query(20, description="Maximum results", ge=1, le=100),
@@ -322,7 +330,7 @@ async def search_locations(
         )
 
 
-@router.get("/ubicaciones/validate/{provincia_id}/{canton_id}/{distrito_id}", response_model=LocationValidationResponse)
+@ubicaciones_router.get("/validate/{provincia_id}/{canton_id}/{distrito_id}", response_model=LocationValidationResponse)
 async def validate_location(
     provincia_id: int = Path(..., description="Province code (1-7)", ge=1, le=7),
     canton_id: int = Path(..., description="Canton code (1-99)", ge=1, le=99),
@@ -379,7 +387,7 @@ async def validate_location(
 
 
 # Units of Measure Endpoints
-@router.get("/unidades-medida", response_model=List[UnitsOfMeasureResponse])
+@unidades_router.get("", response_model=List[UnitsOfMeasureResponse])
 async def get_units_of_measure(
     category: Optional[str] = Query(None, description="Filter by category"),
     only_common: bool = Query(False, description="Include only commonly used units"),
@@ -438,7 +446,7 @@ async def get_units_of_measure(
         )
 
 
-@router.get("/unidades-medida/search", response_model=List[UnitsOfMeasureResponse])
+@unidades_router.get("/search", response_model=List[UnitsOfMeasureResponse])
 async def search_units_of_measure(
     q: str = Query(..., description="Search query", min_length=1),
     category: Optional[str] = Query(None, description="Filter by category"),
@@ -470,7 +478,7 @@ async def search_units_of_measure(
         )
 
 
-@router.get("/unidades-medida/{codigo}", response_model=UnitsOfMeasureResponse)
+@unidades_router.get("/{codigo}", response_model=UnitsOfMeasureResponse)
 async def get_unit_of_measure(
     codigo: str = Path(..., description="Unit code"),
     tenant = Depends(get_current_tenant),
@@ -502,7 +510,7 @@ async def get_unit_of_measure(
         )
 
 
-@router.get("/unidades-medida/categories", response_model=List[str])
+@unidades_router.get("/categories", response_model=List[str])
 async def get_unit_categories(
     tenant = Depends(get_current_tenant),
     db = Depends(get_db)
@@ -523,7 +531,7 @@ async def get_unit_categories(
         )
 
 
-@router.get("/unidades-medida/most-used", response_model=List[UnitsOfMeasureResponse])
+@unidades_router.get("/most-used", response_model=List[UnitsOfMeasureResponse])
 async def get_most_used_units(
     limit: int = Query(50, description="Maximum results", ge=1, le=200),
     tenant = Depends(get_current_tenant),
@@ -552,7 +560,7 @@ async def get_most_used_units(
 
 
 # Currency Endpoints
-@router.get("/monedas", response_model=List[CurrencyResponse])
+@monedas_router.get("", response_model=List[CurrencyResponse])
 async def get_supported_currencies(
     tenant = Depends(get_current_tenant)
 ):
@@ -717,7 +725,7 @@ async def get_supported_currencies(
         )
 
 
-@router.get("/monedas/{codigo}", response_model=CurrencyResponse)
+@monedas_router.get("/{codigo}", response_model=CurrencyResponse)
 async def get_currency(
     codigo: str = Path(..., description="ISO 4217 currency code", min_length=3, max_length=3),
     tenant = Depends(get_current_tenant)
@@ -750,7 +758,7 @@ async def get_currency(
 
 
 # Utility Endpoints
-@router.get("/validate-identification/{tipo}/{numero}")
+@utils_router.get("/validate-identification/{tipo}/{numero}")
 async def validate_identification(
     tipo: str = Path(..., description="Identification type (01-06)"),
     numero: str = Path(..., description="Identification number"),
@@ -795,7 +803,7 @@ async def validate_identification(
 
 
 # Consecutive Number Endpoints
-@router.get("/consecutivo/next/{tipo}", response_model=ConsecutiveNumberResponse)
+@consecutivo_router.get("/next/{tipo}", response_model=ConsecutiveNumberResponse)
 async def get_next_consecutive_number(
     tipo: str = Path(..., description="Document type code (01-07)"),
     branch: str = Query("001", description="Branch code (3 digits)", regex=r'^\d{3}$'),
