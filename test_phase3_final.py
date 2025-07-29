@@ -18,8 +18,8 @@ TENANT_ID = tenant_info["tenant_id"]
 API_KEY = tenant_info["api_key"]
 
 def test_create_invoice():
-    """Probar creación de factura electrónica real"""
-    print("🧪 Test Fase 3 - Creación de Factura Electrónica")
+    """Test real electronic invoice creation"""
+    print("🧪 Test Phase 3 - Electronic Invoice Creation")
     print(f"Tenant: {tenant_info['empresa']}")
     print(f"API Key: {API_KEY[:50]}...")
     print("-" * 60)
@@ -29,20 +29,20 @@ def test_create_invoice():
         "Content-Type": "application/json"
     }
     
-    # Datos mínimos para una factura de prueba
+    # Minimal invoice test data
     invoice_data = {
-        "tipo_documento": "01",  # Factura electrónica
-        "condicion_venta": "01",  # Contado
-        "medio_pago": "01",  # Efectivo
+        "tipo_documento": "01",  # Electronic invoice
+        "condicion_venta": "01",  # Cash payment
+        "medio_pago": "01",  # Cash
         "codigo_moneda": "CRC",
         "tipo_cambio": 1.0,
         "emisor": {
             "nombre": "Johel Venegas Dev",
             "identificacion": {
-                "tipo": "02",  # Cédula jurídica
+                "tipo": "02",  # Legal ID
                 "numero": "3101858030"
             },
-            "codigo_actividad": "620200",  # Actividades de consultoría informática
+            "codigo_actividad": "620200",  # IT consulting activities
             "ubicacion": {
                 "provincia": 1,
                 "canton": 1,
@@ -54,7 +54,7 @@ def test_create_invoice():
         "receptor": {
             "nombre": "Cliente de Prueba",
             "identificacion": {
-                "tipo": "01",  # Cédula física
+                "tipo": "01",  # Physical ID
                 "numero": "123456789"
             },
             "ubicacion": {
@@ -67,16 +67,16 @@ def test_create_invoice():
         "detalles": [
             {
                 "numero_linea": 1,
-                "codigo_cabys": "81112001",  # Servicios de consultoría en informática
+                "codigo_cabys": "8111200100000",  # IT consulting services (13 digits)
                 "cantidad": 1,
-                "unidad_medida": "Sp",  # Servicio profesional
+                "unidad_medida": "Sp",  # Professional service
                 "descripcion": "Consultoría en desarrollo de software",
                 "precio_unitario": 50000.0,
                 "monto_total": 50000.0,
                 "impuestos": [
                     {
-                        "codigo": "01",  # IVA
-                        "codigo_tarifa_iva": "08",  # Tarifa general 13%
+                        "codigo": "01",  # VAT
+                        "codigo_tarifa_iva": "08",  # General rate 13%
                         "tarifa": 13.0,
                         "monto": 6500.0
                     }
@@ -88,7 +88,7 @@ def test_create_invoice():
     try:
         print("🚀 Enviando factura al API...")
         response = requests.post(
-            f"{API_BASE}/documents/",
+            f"{API_BASE}/documentos/",
             headers=headers,
             json=invoice_data,
             timeout=30
