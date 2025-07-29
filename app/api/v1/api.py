@@ -11,7 +11,7 @@ api_router = APIRouter()
 
 # Include endpoint routers
 api_router.include_router(tenants.router, prefix="/tenants")
-api_router.include_router(documents.router, prefix="/documentos")
+api_router.include_router(documents.router, prefix="/documents")
 
 # Authentication endpoints
 api_router.include_router(auth.router, prefix="/auth")

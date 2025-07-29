@@ -20,8 +20,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     
     # Endpoints that require document creation limits
     DOCUMENT_CREATION_ENDPOINTS = {
-        "/api/v1/documentos",
-        "/api/v1/documentos/",
+        "/api/v1/documents",
+        "/api/v1/documents/",
     }
     
     # Endpoints exempt from rate limiting
@@ -352,7 +352,7 @@ async def check_rate_limit_dependency(request: Request) -> None:
     endpoint = request.url.path
     is_document_creation = (
         request.method.upper() == "POST" and
-        endpoint.startswith("/api/v1/documentos")
+        endpoint.startswith("/api/v1/documents")
     )
     
     allowed, limit_results, headers = await rate_limiter.check_all_limits(

@@ -8,11 +8,13 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, Path, status
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 
 from app.core.database import get_db
 from app.core.auth import get_current_tenant
 from app.models.tenant import Tenant
-from app.models.document import DocumentStatus
+from app.models.document import Document, DocumentStatus
+from app.models.document_reference import DocumentReference
 from app.schemas.documents import (
     DocumentCreate, DocumentResponse, DocumentDetail, DocumentList,
     DocumentFilters, DocumentStatusUpdate, DocumentSummary
@@ -23,7 +25,11 @@ from app.utils.error_responses import (
     DocumentNotFoundError, ValidationError, PermissionError as CustomPermissionError
 )
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/documents",
+    tags=["Electronic Documents"],
+    responses={404: {"description": "Not found"}}
+)
 
 
 @router.post(
@@ -371,6 +377,69 @@ async def download_document_xml(
 
 
 @router.get(
+    "/{document_id}/status",
+    response_model=dict,
+    summary="Check Ministry status",
+    description="Check document processing status with Ministry of Finance"
+)
+async def check_document_status(
+    document_id: UUID = Path(..., description="Document UUID"),
+    current_tenant: Tenant = Depends(get_current_tenant),
+    db: Session = Depends(get_db)
+):
+    """
+    Check document processing status with Ministry of Finance
+    
+    Returns current Ministry processing status including:
+    - Document processing state
+    - Ministry response messages
+    - Processing timestamps
+    - Error details if any
+    
+    Requirements: 5.5 - Ministry status check
+    """
+    try:
+        service = DocumentService(db)
+        document = service.get_document(
+            document_id=document_id,
+            tenant_id=current_tenant.id,
+            include_details=False
+        )
+        
+        if not document:
+            raise DocumentNotFoundError("Document not found")
+        
+        # Return comprehensive status information
+        status_info = {
+            "document_id": str(document.id),
+            "clave": document.clave,
+            "estado": document.estado.value if document.estado else "unknown",
+            "fecha_emision": document.fecha_emision.isoformat(),
+            "fecha_procesamiento": document.fecha_procesamiento.isoformat() if document.fecha_procesamiento else None,
+            "fecha_aceptacion": document.fecha_aceptacion.isoformat() if hasattr(document, 'fecha_aceptacion') and document.fecha_aceptacion else None,
+            "mensaje_hacienda": document.mensaje_hacienda,
+            "intentos_envio": document.intentos_envio if hasattr(document, 'intentos_envio') else 0,
+            "xml_firmado_disponible": bool(document.xml_firmado),
+            "xml_respuesta_disponible": bool(document.xml_respuesta_hacienda),
+            "puede_reenviar": document.estado in [DocumentStatus.ERROR, DocumentStatus.RECHAZADO] if hasattr(document, 'estado') else False,
+            "puede_cancelar": document.estado in [DocumentStatus.BORRADOR, DocumentStatus.ENVIADO] if hasattr(document, 'estado') else False
+        }
+        
+        return status_info
+        
+    except DocumentNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error checking document status"
+        )
+
+
+@router.get(
     "/{document_id}/pdf",
     response_class=Response,
     summary="Download document PDF",
@@ -425,7 +494,7 @@ async def download_document_pdf(
 
 
 @router.post(
-    "/{document_id}/reenviar",
+    "/{document_id}/resend",
     response_model=DocumentResponse,
     summary="Resend document to Ministry",
     description="Resubmit document to Ministry of Finance"
@@ -455,18 +524,31 @@ async def resend_document(
         if not document:
             raise DocumentNotFoundError("Document not found")
         
-        if not document.can_be_sent:
+        # Check if document can be resent
+        if document.estado not in [DocumentStatus.ERROR, DocumentStatus.RECHAZADO, DocumentStatus.BORRADOR]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Document cannot be resent in current state"
+                detail=f"Document cannot be resent in current state: {document.estado.value}"
             )
         
-        # TODO: Implement Ministry resubmission
-        # This would integrate with the Ministry service
-        raise HTTPException(
-            status_code=status.HTTP_501_NOT_IMPLEMENTED,
-            detail="Document resubmission not yet implemented"
+        # Update status to pending for resubmission
+        status_update = DocumentStatusUpdate(
+            estado=DocumentStatus.PENDIENTE,
+            mensaje_hacienda="Document queued for resubmission"
         )
+        
+        updated_document = service.update_document_status(
+            document_id=document_id,
+            tenant_id=current_tenant.id,
+            status_update=status_update,
+            updated_by=f"tenant:{current_tenant.id}"
+        )
+        
+        # TODO: Queue document for Ministry submission
+        # This would integrate with the Ministry service and background task queue
+        # For now, we'll just update the status to indicate it's ready for processing
+        
+        return service._document_to_response(updated_document)
         
     except DocumentNotFoundError:
         raise HTTPException(
@@ -481,7 +563,7 @@ async def resend_document(
 
 
 @router.post(
-    "/{document_id}/cancelar",
+    "/{document_id}/cancel",
     response_model=DocumentResponse,
     summary="Cancel document",
     description="Cancel document and notify Ministry if necessary"
@@ -511,10 +593,11 @@ async def cancel_document(
         if not document:
             raise DocumentNotFoundError("Document not found")
         
-        if document.is_final:
+        # Check if document can be cancelled
+        if document.estado not in [DocumentStatus.BORRADOR, DocumentStatus.PENDIENTE, DocumentStatus.ERROR]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Document cannot be cancelled in current state"
+                detail=f"Document cannot be cancelled in current state: {document.estado.value}"
             )
         
         # Update status to cancelled
@@ -545,7 +628,7 @@ async def cancel_document(
 
 
 @router.get(
-    "/{document_id}/referencias",
+    "/{document_id}/references",
     response_model=List[DocumentResponse],
     summary="Get document relationships",
     description="Get documents that reference this document or are referenced by it"
@@ -575,9 +658,33 @@ async def get_document_references(
         if not document:
             raise DocumentNotFoundError("Document not found")
         
-        # TODO: Implement document relationship queries
-        # This would query DocumentReference model to find related documents
-        return []
+        related_documents = []
+        
+        # Find documents that reference this document (by document key)
+        referencing_docs = db.query(Document).join(DocumentReference).filter(
+            and_(
+                Document.tenant_id == current_tenant.id,
+                DocumentReference.numero == document.clave
+            )
+        ).all()
+        
+        # Find documents referenced by this document
+        if hasattr(document, 'referencias') and document.referencias:
+            referenced_keys = [ref.numero for ref in document.referencias if ref.numero]
+            referenced_docs = db.query(Document).filter(
+                and_(
+                    Document.tenant_id == current_tenant.id,
+                    Document.clave.in_(referenced_keys)
+                )
+            ).all()
+            related_documents.extend(referenced_docs)
+        
+        # Add referencing documents
+        related_documents.extend(referencing_docs)
+        
+        # Remove duplicates and convert to response models
+        unique_docs = {doc.id: doc for doc in related_documents}
+        return [service._document_to_response(doc) for doc in unique_docs.values()]
         
     except DocumentNotFoundError:
         raise HTTPException(

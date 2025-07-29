@@ -280,7 +280,7 @@
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_
 
 - [-] 10. Create comprehensive API endpoints
-  - [-] 10.1 Implement authentication and security endpoints
+  - [x] 10.1 Implement authentication and security endpoints
     - Create POST /v1/auth/validate-key for API key validation
     - Add POST /v1/auth/token for optional JWT token generation
     - Implement GET /v1/auth/token/validate for token validation
@@ -288,7 +288,7 @@
     - Execute: `git add app/api/v1/endpoints/auth.py && git commit -m "feat(api): implement authentication and security endpoints"`
     - _Requirements: 4.1, 4.2, 4.3_
 
-  - [ ] 10.2 Create comprehensive tenant management endpoints
+  - [x] 10.2 Create comprehensive tenant management endpoints
     - Implement POST /v1/tenants for tenant creation with full validation
     - Add GET /v1/tenants/{id} for tenant retrieval with usage statistics
     - Create PUT /v1/tenants/{id} for tenant updates and plan changes

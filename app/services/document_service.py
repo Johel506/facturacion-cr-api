@@ -763,8 +763,8 @@ class DocumentService:
             total_comprobante=document.total_comprobante,
             codigo_moneda=document.codigo_moneda,
             tipo_cambio=document.tipo_cambio,
-            xml_url=f"/api/v1/documentos/{document.id}/xml" if document.xml_firmado else None,
-            pdf_url=f"/api/v1/documentos/{document.id}/pdf" if document.estado == DocumentStatus.ACEPTADO else None,
+            xml_url=f"/api/v1/documents/{document.id}/xml" if document.xml_firmado else None,
+            pdf_url=f"/api/v1/documents/{document.id}/pdf" if document.estado == DocumentStatus.ACEPTADO else None,
             created_at=document.created_at,
             updated_at=document.updated_at
         )
