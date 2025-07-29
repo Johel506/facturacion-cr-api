@@ -270,3 +270,20 @@ class Tenant(Base):
             }
         }
         return plan_configs.get(self.plan, plan_configs['basico'])
+    
+    def get_plan_features(self) -> list:
+        """Get list of features available for current plan"""
+        return self.get_plan_limits().get('features', [])
+    
+    @property
+    def days_until_certificate_expires(self) -> Optional[int]:
+        """Get number of days until certificate expires"""
+        if not self.certificado_expires_at:
+            return None
+        
+        now = datetime.now(timezone.utc)
+        if self.certificado_expires_at <= now:
+            return 0  # Already expired
+        
+        delta = self.certificado_expires_at - now
+        return delta.days

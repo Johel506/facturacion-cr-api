@@ -279,8 +279,8 @@
     - Execute: `git add app/services/document_relationship_service.py app/utils/document_validator.py && git commit -m "feat(documents): add document relationship management"`
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_
 
-- [ ] 10. Create comprehensive API endpoints
-  - [ ] 10.1 Implement authentication and security endpoints
+- [-] 10. Create comprehensive API endpoints
+  - [-] 10.1 Implement authentication and security endpoints
     - Create POST /v1/auth/validate-key for API key validation
     - Add POST /v1/auth/token for optional JWT token generation
     - Implement GET /v1/auth/token/validate for token validation

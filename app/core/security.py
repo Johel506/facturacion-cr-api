@@ -430,3 +430,30 @@ def decrypt_certificate_data(encrypted_cert: bytes, encrypted_password: str) -> 
     cert_data = DataEncryption.decrypt_binary_data(encrypted_cert)
     password = DataEncryption.decrypt_data(encrypted_password)
     return cert_data, password
+
+
+def create_jwt_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    """
+    Create JWT token for optional authentication
+    
+    Args:
+        data: Token payload data
+        expires_delta: Token expiration time
+        
+    Returns:
+        Encoded JWT token
+    """
+    return JWTManager.create_access_token(data, expires_delta)
+
+
+def verify_jwt_token(token: str) -> Optional[dict]:
+    """
+    Verify JWT token and return payload
+    
+    Args:
+        token: JWT token to verify
+        
+    Returns:
+        Decoded token payload or None if invalid
+    """
+    return JWTManager.verify_token(token)

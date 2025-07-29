@@ -108,7 +108,9 @@ class APIKeyAuthMiddleware(BaseHTTPMiddleware):
             path in self.EXEMPT_PATHS or 
             path.startswith("/static/") or
             path.endswith("/openapi.json") or  # Allow openapi.json at any path level
-            path == "/api/v1/tenants/"  # Allow tenant creation
+            path == "/api/v1/tenants/" or  # Allow tenant creation
+            path == "/api/v1/auth/health" or  # Allow auth health check
+            path == "/api/v1/auth/token/validate"  # Allow JWT token validation
         )
     
     async def _authenticate_request(self, request: Request) -> Optional[Tenant]:
