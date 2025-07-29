@@ -11,11 +11,15 @@ from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, HTTPException, Query, Depends, Path
 from pydantic import BaseModel, Field, validator
 from decimal import Decimal
+from datetime import datetime, timezone
 
 from app.core.auth import get_current_tenant
 from app.core.database import get_db
 from app.models.geographic_location import GeographicLocation
 from app.models.units_of_measure import UnitsOfMeasure
+from app.models.tenant import Tenant
+from app.schemas.enums import DocumentType
+from app.services.consecutive_service import ConsecutiveService
 
 router = APIRouter(prefix="/reference", tags=["Reference Data"])
 
@@ -105,6 +109,20 @@ class LocationValidationResponse(BaseModel):
     is_valid: bool = Field(..., description="Whether location is valid")
     error_message: Optional[str] = Field(None, description="Error message if invalid")
     location_data: Optional[GeographicLocationResponse] = Field(None, description="Location data if valid")
+
+
+class ConsecutiveNumberResponse(BaseModel):
+    """Consecutive number response model"""
+    document_type: str = Field(..., description="Document type code")
+    document_type_name: str = Field(..., description="Document type name")
+    next_consecutive: str = Field(..., description="Next consecutive number (20 digits)")
+    branch: str = Field(..., description="Branch code (3 digits)")
+    terminal: str = Field(..., description="Terminal code (5 digits)")
+    sequential: int = Field(..., description="Sequential number")
+    formatted_consecutive: str = Field(..., description="Formatted consecutive number")
+    preview_document_key: str = Field(..., description="Preview of document key that would be generated")
+    tenant_id: str = Field(..., description="Tenant ID")
+    generated_at: str = Field(..., description="Generation timestamp")
 
 
 # Geographic Location Endpoints
@@ -773,4 +791,104 @@ async def validate_identification(
         raise HTTPException(
             status_code=500,
             detail=f"Error validating identification: {str(e)}"
+        )
+
+
+# Consecutive Number Endpoints
+@router.get("/consecutivo/next/{tipo}", response_model=ConsecutiveNumberResponse)
+async def get_next_consecutive_number(
+    tipo: str = Path(..., description="Document type code (01-07)"),
+    branch: str = Query("001", description="Branch code (3 digits)", regex=r'^\d{3}$'),
+    terminal: str = Query("00001", description="Terminal code (5 digits)", regex=r'^\d{5}$'),
+    tenant: Tenant = Depends(get_current_tenant),
+    db = Depends(get_db)
+):
+    """
+    Get next consecutive number by document type
+    
+    Returns the next consecutive number that would be generated for the specified
+    document type, branch, and terminal combination. Also provides a preview of
+    the document key that would be generated.
+    
+    Document types:
+    - 01: Factura Electrónica
+    - 02: Nota de Débito Electrónica  
+    - 03: Nota de Crédito Electrónica
+    - 04: Tiquete Electrónico
+    - 05: Factura Electrónica de Exportación
+    - 06: Factura Electrónica de Compra
+    - 07: Recibo Electrónico de Pago
+    """
+    try:
+        # Validate document type
+        document_type_names = {
+            "01": "Factura Electrónica",
+            "02": "Nota de Débito Electrónica",
+            "03": "Nota de Crédito Electrónica", 
+            "04": "Tiquete Electrónico",
+            "05": "Factura Electrónica de Exportación",
+            "06": "Factura Electrónica de Compra",
+            "07": "Recibo Electrónico de Pago"
+        }
+        
+        if tipo not in document_type_names:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid document type: {tipo}. Must be one of: {', '.join(document_type_names.keys())}"
+            )
+        
+        # Convert to DocumentType enum
+        try:
+            document_type = DocumentType(tipo)
+        except ValueError:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid document type: {tipo}"
+            )
+        
+        # Create consecutive service
+        consecutive_service = ConsecutiveService(db)
+        
+        # Get next consecutive number preview
+        next_consecutive = consecutive_service.get_next_consecutive_preview(
+            tenant_id=tenant.id,
+            document_type=document_type,
+            branch=branch,
+            terminal=terminal
+        )
+        
+        # Parse consecutive number components
+        components = consecutive_service.parse_consecutive_number(next_consecutive)
+        sequential = int(components["sequential"])
+        
+        # Generate preview document key
+        preview_key = consecutive_service.generate_document_key(
+            tenant=tenant,
+            document_type=document_type,
+            consecutive_number=next_consecutive,
+            emission_date=datetime.now(timezone.utc)
+        )
+        
+        # Format consecutive number for display
+        formatted_consecutive = f"{branch}-{terminal}-{tipo}-{sequential:010d}"
+        
+        return ConsecutiveNumberResponse(
+            document_type=tipo,
+            document_type_name=document_type_names[tipo],
+            next_consecutive=next_consecutive,
+            branch=branch,
+            terminal=terminal,
+            sequential=sequential,
+            formatted_consecutive=formatted_consecutive,
+            preview_document_key=preview_key,
+            tenant_id=str(tenant.id),
+            generated_at=datetime.now(timezone.utc).isoformat()
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error generating next consecutive number: {str(e)}"
         )
