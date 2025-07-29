@@ -97,8 +97,8 @@ class Document(Base):
                       nullable=False, index=True, comment="Tenant owner of the document")
     
     # Document identification (Requirements 9.1, 10.1, 10.2, 10.3)
-    tipo_documento = Column(SQLEnum(DocumentType), nullable=False, index=True,
-                          comment="Document type: 01-07")
+    tipo_documento = Column(SQLEnum(DocumentType, values_callable=lambda x: [e.value for e in x]), 
+                          nullable=False, index=True, comment="Document type: 01-07")
     numero_consecutivo = Column(String(20), nullable=False, index=True,
                               comment="20-digit consecutive number: Branch(3)+Terminal(5)+DocType(2)+Sequential(10)")
     clave = Column(String(50), nullable=False, unique=True, index=True,
@@ -108,8 +108,8 @@ class Document(Base):
     
     # Emisor information (Requirements 11.1, 11.3)
     emisor_nombre = Column(String(100), nullable=False, comment="Issuer legal name")
-    emisor_tipo_identificacion = Column(SQLEnum(IdentificationType), nullable=False,
-                                      comment="Issuer identification type")
+    emisor_tipo_identificacion = Column(SQLEnum(IdentificationType, values_callable=lambda x: [e.value for e in x]), 
+                                      nullable=False, comment="Issuer identification type")
     emisor_numero_identificacion = Column(String(20), nullable=False, index=True,
                                         comment="Issuer identification number")
     emisor_nombre_comercial = Column(String(80), nullable=True, comment="Issuer commercial name")
@@ -129,8 +129,8 @@ class Document(Base):
     
     # Receptor information (Optional for some document types like tickets)
     receptor_nombre = Column(String(100), nullable=True, comment="Receiver legal name")
-    receptor_tipo_identificacion = Column(SQLEnum(IdentificationType), nullable=True,
-                                        comment="Receiver identification type")
+    receptor_tipo_identificacion = Column(SQLEnum(IdentificationType, values_callable=lambda x: [e.value for e in x]), 
+                                        nullable=True, comment="Receiver identification type")
     receptor_numero_identificacion = Column(String(20), nullable=True, index=True,
                                           comment="Receiver identification number")
     receptor_nombre_comercial = Column(String(80), nullable=True, comment="Receiver commercial name")
@@ -151,14 +151,14 @@ class Document(Base):
     receptor_correo_electronico = Column(String(160), nullable=True, comment="Receiver email")
     
     # Transaction conditions (Requirements 11.3, 11.4)
-    condicion_venta = Column(SQLEnum(SaleCondition), nullable=False,
-                           comment="Sale condition: 01-15, 99")
+    condicion_venta = Column(SQLEnum(SaleCondition, values_callable=lambda x: [e.value for e in x]), 
+                           nullable=False, comment="Sale condition: 01-15, 99")
     condicion_venta_otros = Column(String(100), nullable=True,
                                  comment="Other sale condition description (required when 99)")
     plazo_credito = Column(Integer, nullable=True,
                          comment="Credit term in days (required for credit sales)")
-    medio_pago = Column(SQLEnum(PaymentMethod), nullable=False,
-                       comment="Payment method: 01-05, 99")
+    medio_pago = Column(SQLEnum(PaymentMethod, values_callable=lambda x: [e.value for e in x]), 
+                       nullable=False, comment="Payment method: 01-05, 99")
     medio_pago_otros = Column(String(100), nullable=True,
                             comment="Other payment method description (required when 99)")
     

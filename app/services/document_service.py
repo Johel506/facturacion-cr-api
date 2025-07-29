@@ -641,9 +641,45 @@ class DocumentService:
         }
     
     def _create_document_details(self, document_id: UUID, detalles: List) -> None:
-        """Create document line items (placeholder - requires DocumentDetail model)"""
-        # This will be fully implemented when DocumentDetail model is available
-        pass
+        """Create document line items"""
+        from app.models.document_detail import DocumentDetail
+        
+        for detalle in detalles:
+            # Calculate line totals
+            monto_descuento = Decimal('0')
+            if hasattr(detalle, 'descuento') and detalle.descuento:
+                monto_descuento = detalle.descuento.monto_descuento
+            
+            # Create detail record
+            detail = DocumentDetail(
+                documento_id=document_id,
+                numero_linea=detalle.numero_linea,
+                codigo_cabys=detalle.codigo_cabys,
+                descripcion=detalle.descripcion,
+                cantidad=Decimal(str(detalle.cantidad)),
+                unidad_medida=detalle.unidad_medida,
+                unidad_medida_comercial=getattr(detalle, 'unidad_medida_comercial', None),
+                precio_unitario=Decimal(str(detalle.precio_unitario)),
+                monto_total=Decimal(str(detalle.monto_total)),
+                monto_descuento=monto_descuento,
+                naturaleza_descuento=getattr(detalle.descuento, 'naturaleza', None) if hasattr(detalle, 'descuento') and detalle.descuento else None,
+                # Special fields
+                tipo_transaccion=getattr(detalle, 'tipo_transaccion', None),
+                numero_vin_serie=getattr(detalle, 'numero_vin_serie', None),
+                registro_medicamento=getattr(detalle, 'registro_medicamento', None),
+                forma_farmaceutica=getattr(detalle, 'forma_farmaceutica', None),
+                # Commercial codes
+                codigos_comerciales=getattr(detalle, 'codigos_comerciales', None),
+                # Package components  
+                detalle_surtido=getattr(detalle, 'detalle_surtido', None),
+                # Additional fields
+                codigo_producto_interno=getattr(detalle, 'codigo_producto_interno', None),
+                marca=getattr(detalle, 'marca', None),
+                modelo=getattr(detalle, 'modelo', None),
+                # Audit fields are handled by defaults
+            )
+            
+            self.db.add(detail)
     
     def _create_document_references(self, document_id: UUID, referencias: List) -> None:
         """Create document references (placeholder - requires DocumentReference model)"""
