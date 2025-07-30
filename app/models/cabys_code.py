@@ -45,7 +45,7 @@ class CabysCode(Base):
     descripcion = Column(Text, nullable=False, 
                         comment="Product or service description in Spanish")
     
-    # Classification hierarchy (4 levels as per migration)
+    # Classification hierarchy (8 levels as per migration)
     categoria_nivel_1 = Column(String(255), nullable=True,
                               comment="Level 1 category (broadest classification)")
     categoria_nivel_2 = Column(String(255), nullable=True,
@@ -54,6 +54,14 @@ class CabysCode(Base):
                               comment="Level 3 category (detailed classification)")
     categoria_nivel_4 = Column(String(255), nullable=True,
                               comment="Level 4 category")
+    categoria_nivel_5 = Column(String(255), nullable=True,
+                              comment="Level 5 category")
+    categoria_nivel_6 = Column(String(255), nullable=True,
+                              comment="Level 6 category")
+    categoria_nivel_7 = Column(String(255), nullable=True,
+                              comment="Level 7 category")
+    categoria_nivel_8 = Column(String(255), nullable=True,
+                              comment="Level 8 category (most specific)")
     
     # Tax information
     impuesto_iva = Column(Numeric(4, 2), nullable=False, default=Decimal('13.00'),
@@ -126,6 +134,10 @@ class CabysCode(Base):
         Index("idx_cabys_categoria_2", "categoria_nivel_2"),
         Index("idx_cabys_categoria_3", "categoria_nivel_3"),
         Index("idx_cabys_categoria_4", "categoria_nivel_4"),
+        Index("idx_cabys_categoria_5", "categoria_nivel_5"),
+        Index("idx_cabys_categoria_6", "categoria_nivel_6"),
+        Index("idx_cabys_categoria_7", "categoria_nivel_7"),
+        Index("idx_cabys_categoria_8", "categoria_nivel_8"),
 
         Index("idx_cabys_impuesto_iva", "impuesto_iva"),
         Index("idx_cabys_exento_iva", "exento_iva"),
@@ -136,6 +148,13 @@ class CabysCode(Base):
         
         # Composite indexes for common queries
         Index("idx_cabys_activo_categoria", "activo", "categoria_nivel_1"),
+        Index("idx_cabys_activo_categoria_2", "activo", "categoria_nivel_2"),
+        Index("idx_cabys_activo_categoria_3", "activo", "categoria_nivel_3"),
+        Index("idx_cabys_activo_categoria_4", "activo", "categoria_nivel_4"),
+        Index("idx_cabys_activo_categoria_5", "activo", "categoria_nivel_5"),
+        Index("idx_cabys_activo_categoria_6", "activo", "categoria_nivel_6"),
+        Index("idx_cabys_activo_categoria_7", "activo", "categoria_nivel_7"),
+        Index("idx_cabys_activo_categoria_8", "activo", "categoria_nivel_8"),
         Index("idx_cabys_activo_impuesto", "activo", "impuesto_iva"),
         Index("idx_cabys_activo_exento", "activo", "exento_iva"),
         Index("idx_cabys_popular", "activo", "veces_usado"),
@@ -304,12 +323,16 @@ class CabysCode(Base):
         if only_active:
             base_query = base_query.filter(cls.activo == True)
         
-        # Select appropriate category level (1-4)
+        # Select appropriate category level (1-8)
         category_field = {
             1: cls.categoria_nivel_1,
             2: cls.categoria_nivel_2,
             3: cls.categoria_nivel_3,
-            4: cls.categoria_nivel_4
+            4: cls.categoria_nivel_4,
+            5: cls.categoria_nivel_5,
+            6: cls.categoria_nivel_6,
+            7: cls.categoria_nivel_7,
+            8: cls.categoria_nivel_8
         }.get(nivel, cls.categoria_nivel_1)
         
         results = base_query.filter(

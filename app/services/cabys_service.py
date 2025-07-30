@@ -409,12 +409,12 @@ class CabysService:
         Get all unique categories at specified level
         
         Args:
-            nivel: Category level (1-4)
+            nivel: Category level (1-8)
             
         Returns:
             List of unique category names
         """
-        if nivel < 1 or nivel > 4:
+        if nivel < 1 or nivel > 8:
             return []
         
         cache_key = f"cabys_categories:{nivel}"
@@ -433,7 +433,11 @@ class CabysService:
                 1: CabysCode.categoria_nivel_1,
                 2: CabysCode.categoria_nivel_2,
                 3: CabysCode.categoria_nivel_3,
-                4: CabysCode.categoria_nivel_4
+                4: CabysCode.categoria_nivel_4,
+                5: CabysCode.categoria_nivel_5,
+                6: CabysCode.categoria_nivel_6,
+                7: CabysCode.categoria_nivel_7,
+                8: CabysCode.categoria_nivel_8
             }
             
             column = column_map[nivel]
@@ -490,12 +494,16 @@ class CabysService:
             
             # Get category counts
             category_counts = {}
-            for nivel in range(1, 5):
+            for nivel in range(1, 9):
                 column_map = {
                     1: CabysCode.categoria_nivel_1,
                     2: CabysCode.categoria_nivel_2,
                     3: CabysCode.categoria_nivel_3,
-                    4: CabysCode.categoria_nivel_4
+                    4: CabysCode.categoria_nivel_4,
+                    5: CabysCode.categoria_nivel_5,
+                    6: CabysCode.categoria_nivel_6,
+                    7: CabysCode.categoria_nivel_7,
+                    8: CabysCode.categoria_nivel_8
                 }
                 
                 column = column_map[nivel]

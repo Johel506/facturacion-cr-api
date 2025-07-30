@@ -25,6 +25,10 @@ class CabysCodeResponse(BaseModel):
     categoria_nivel_2: Optional[str] = Field(None, description="Level 2 category")
     categoria_nivel_3: Optional[str] = Field(None, description="Level 3 category")
     categoria_nivel_4: Optional[str] = Field(None, description="Level 4 category")
+    categoria_nivel_5: Optional[str] = Field(None, description="Level 5 category")
+    categoria_nivel_6: Optional[str] = Field(None, description="Level 6 category")
+    categoria_nivel_7: Optional[str] = Field(None, description="Level 7 category")
+    categoria_nivel_8: Optional[str] = Field(None, description="Level 8 category")
     categoria_completa: str = Field(..., description="Complete category hierarchy")
     impuesto_iva: float = Field(..., description="IVA tax rate percentage")
     impuesto_iva_decimal: float = Field(..., description="IVA tax rate as decimal")
@@ -76,7 +80,7 @@ async def search_cabys_codes(
     limit: int = Query(20, description="Maximum results per page", ge=1, le=100),
     offset: int = Query(0, description="Number of results to skip", ge=0),
     category_filter: Optional[str] = Query(None, description="Category filter"),
-    category_level: int = Query(1, description="Category level for filtering", ge=1, le=4),
+    category_level: int = Query(1, description="Category level for filtering", ge=1, le=8),
     only_active: bool = Query(True, description="Include only active codes"),
     tenant = Depends(get_current_tenant)
 ):
@@ -106,34 +110,99 @@ async def search_cabys_codes(
         )
 
 
-@router.get("/{codigo}", response_model=CabysCodeResponse)
-async def get_cabys_code(
-    codigo: str = Path(..., description="13-digit CABYS code"),
+@router.get("/categories", response_model=List[str])
+async def get_categories(
+    nivel: int = Query(1, description="Category level", ge=1, le=8),
     tenant = Depends(get_current_tenant)
 ):
     """
-    Get CABYS code by exact code match
+    Get all unique categories at specified level
     
-    Retrieves detailed information for a specific CABYS code including
-    tax information, category hierarchy, and usage statistics.
+    Returns a list of all unique category names at the specified level.
+    Useful for building category filters and navigation.
     """
     try:
-        code_data = await cabys_service.get_code(codigo, use_cache=True)
+        categories = await cabys_service.get_categories(nivel=nivel)
+        return categories
         
-        if not code_data:
-            raise HTTPException(
-                status_code=404,
-                detail=f"CABYS code not found: {codigo}"
-            )
-        
-        return CabysCodeResponse(**code_data)
-        
-    except HTTPException:
-        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Error retrieving CABYS code: {str(e)}"
+            detail=f"Error retrieving categories: {str(e)}"
+        )
+
+
+@router.get("/statistics", response_model=CabysStatisticsResponse)
+async def get_statistics(
+    tenant = Depends(get_current_tenant)
+):
+    """
+    Get CABYS database statistics
+    
+    Returns comprehensive statistics about the CABYS database including
+    counts, usage information, and category breakdowns.
+    """
+    try:
+        stats = await cabys_service.get_statistics()
+        return CabysStatisticsResponse(**stats)
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error retrieving CABYS statistics: {str(e)}"
+        )
+
+
+@router.get("/most-used", response_model=List[CabysCodeResponse])
+async def get_most_used_codes(
+    limit: int = Query(50, description="Maximum number of results", ge=1, le=100),
+    only_active: bool = Query(True, description="Include only active codes"),
+    tenant = Depends(get_current_tenant)
+):
+    """
+    Get most frequently used CABYS codes
+    
+    Returns CABYS codes ordered by usage frequency. Useful for suggesting
+    commonly used codes during invoice creation.
+    """
+    try:
+        results = await cabys_service.get_most_used(
+            limit=limit,
+            only_active=only_active
+        )
+        
+        return [CabysCodeResponse(**code) for code in results]
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error retrieving most used CABYS codes: {str(e)}"
+        )
+
+
+@router.post("/clear-cache")
+async def clear_cache(
+    codigo: Optional[str] = Query(None, description="Specific code to clear, or all if not provided"),
+    tenant = Depends(get_current_tenant)
+):
+    """
+    Clear CABYS cache entries
+    
+    Clears cached CABYS data. Can clear cache for a specific code or all CABYS cache.
+    Useful for cache management and testing.
+    """
+    try:
+        await cabys_service.clear_cache(codigo=codigo)
+        
+        return {
+            "message": f"Cache cleared for {'code ' + codigo if codigo else 'all CABYS entries'}",
+            "success": True
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error clearing cache: {str(e)}"
         )
 
 
@@ -201,7 +270,7 @@ async def search_by_prefix(
 @router.get("/category/{categoria}", response_model=List[CabysCodeResponse])
 async def search_by_category(
     categoria: str = Path(..., description="Category name to search for"),
-    nivel: int = Query(1, description="Category level", ge=1, le=4),
+    nivel: int = Query(1, description="Category level", ge=1, le=8),
     limit: int = Query(50, description="Maximum number of results", ge=1, le=100),
     only_active: bool = Query(True, description="Include only active codes"),
     tenant = Depends(get_current_tenant)
@@ -209,8 +278,8 @@ async def search_by_category(
     """
     Search CABYS codes by category
     
-    Finds CABYS codes that belong to a specific category at the specified level.
-    Useful for browsing codes by product/service categories.
+    Finds CABYS codes that belong to the specified category at the given level.
+    Supports partial matching for flexible category filtering.
     """
     try:
         results = await cabys_service.search_by_category(
@@ -229,97 +298,32 @@ async def search_by_category(
         )
 
 
-@router.get("/most-used", response_model=List[CabysCodeResponse])
-async def get_most_used_codes(
-    limit: int = Query(100, description="Maximum number of results", ge=1, le=500),
-    only_active: bool = Query(True, description="Include only active codes"),
+@router.get("/{codigo}", response_model=CabysCodeResponse)
+async def get_cabys_code(
+    codigo: str = Path(..., description="13-digit CABYS code"),
     tenant = Depends(get_current_tenant)
 ):
     """
-    Get most frequently used CABYS codes
+    Get CABYS code by exact code match
     
-    Returns CABYS codes ordered by usage frequency. Useful for showing
-    popular codes to users for quick selection.
+    Retrieves detailed information for a specific CABYS code including
+    tax information, category hierarchy, and usage statistics.
     """
     try:
-        results = await cabys_service.get_most_used(
-            limit=limit,
-            only_active=only_active
-        )
+        code_data = await cabys_service.get_code(codigo, use_cache=True)
         
-        return [CabysCodeResponse(**code) for code in results]
+        if not code_data:
+            raise HTTPException(
+                status_code=404,
+                detail=f"CABYS code not found: {codigo}"
+            )
         
+        return CabysCodeResponse(**code_data)
+        
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Error retrieving most used CABYS codes: {str(e)}"
-        )
-
-
-@router.get("/categories", response_model=List[str])
-async def get_categories(
-    nivel: int = Query(1, description="Category level", ge=1, le=4),
-    tenant = Depends(get_current_tenant)
-):
-    """
-    Get all unique categories at specified level
-    
-    Returns a list of all unique category names at the specified level.
-    Useful for building category filters and navigation.
-    """
-    try:
-        categories = await cabys_service.get_categories(nivel=nivel)
-        return categories
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error retrieving categories: {str(e)}"
-        )
-
-
-@router.get("/statistics", response_model=CabysStatisticsResponse)
-async def get_statistics(
-    tenant = Depends(get_current_tenant)
-):
-    """
-    Get CABYS database statistics
-    
-    Returns comprehensive statistics about the CABYS database including
-    counts, usage information, and category breakdowns.
-    """
-    try:
-        stats = await cabys_service.get_statistics()
-        return CabysStatisticsResponse(**stats)
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error retrieving CABYS statistics: {str(e)}"
-        )
-
-
-@router.post("/clear-cache")
-async def clear_cache(
-    codigo: Optional[str] = Query(None, description="Specific code to clear, or all if not provided"),
-    tenant = Depends(get_current_tenant)
-):
-    """
-    Clear CABYS cache entries
-    
-    Clears cached CABYS data. Can clear cache for a specific code or all CABYS cache.
-    Useful for cache management and testing.
-    """
-    try:
-        await cabys_service.clear_cache(codigo=codigo)
-        
-        return {
-            "message": f"Cache cleared for {'code ' + codigo if codigo else 'all CABYS entries'}",
-            "success": True
-        }
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error clearing cache: {str(e)}"
+            detail=f"Error retrieving CABYS code: {str(e)}"
         )

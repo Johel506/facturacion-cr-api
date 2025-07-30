@@ -268,7 +268,7 @@ class CabysSearchEngine:
                     primary_codes_query = session.query(CabysCode.codigo)
                     if only_active:
                         primary_codes_query = primary_codes_query.filter(CabysCode.activo == True)
-                    if category_filter and 1 <= category_level <= 4:
+                    if category_filter and 1 <= category_level <= 8:
                         category_column = getattr(CabysCode, f'categoria_nivel_{category_level}')
                         primary_codes_query = primary_codes_query.filter(
                             category_column.ilike(f"%{category_filter}%")
