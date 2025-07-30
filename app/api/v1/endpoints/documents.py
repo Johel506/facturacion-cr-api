@@ -13,13 +13,13 @@ from sqlalchemy import and_
 from app.core.database import get_db
 from app.core.auth import get_current_tenant
 from app.models.tenant import Tenant
-from app.models.document import Document, DocumentStatus
+from app.models.document import Document
 from app.models.document_reference import DocumentReference
 from app.schemas.documents import (
     DocumentCreate, DocumentResponse, DocumentDetail, DocumentList,
     DocumentFilters, DocumentStatusUpdate, DocumentSummary
 )
-from app.schemas.enums import DocumentType
+from app.schemas.enums import DocumentType, DocumentStatus
 from app.services.document_service import DocumentService
 from app.utils.error_responses import (
     DocumentNotFoundError, ValidationError, PermissionError as CustomPermissionError
@@ -85,9 +85,102 @@ async def create_document(
         )
 
 
+# =============================================================================
+# SPECIFIC ROUTES (must come before /{document_id} route)
+# =============================================================================
+
+@router.get(
+    "/search",
+    response_model=DocumentList,
+    summary="Search documents",
+    description="Search documents across multiple fields"
+)
+async def search_documents(
+    q: str = Query(..., min_length=3, description="Search term"),
+    fields: Optional[List[str]] = Query(
+        None, 
+        description="Specific fields to search in (default: all searchable fields)"
+    ),
+    page: int = Query(1, ge=1, description="Page number"),
+    size: int = Query(20, ge=1, le=100, description="Page size"),
+    current_tenant: Tenant = Depends(get_current_tenant),
+    db: Session = Depends(get_db)
+):
+    """
+    Search documents across multiple fields
+    
+    Searches in the following fields by default:
+    - Consecutive number
+    - Document key
+    - Issuer name and identification
+    - Receiver name and identification
+    - Observations
+    
+    Requirements: 9.1 - document search functionality across all fields
+    """
+    try:
+        service = DocumentService(db)
+        return service.search_documents(
+            tenant_id=current_tenant.id,
+            search_term=q,
+            search_fields=fields,
+            page=page,
+            size=size
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error searching documents"
+        )
+
+
+@router.get(
+    "/summary",
+    response_model=DocumentSummary,
+    summary="Get document summary",
+    description="Get document statistics and summary information"
+)
+async def get_document_summary(
+    fecha_desde: Optional[date] = Query(None, description="Start date for summary"),
+    fecha_hasta: Optional[date] = Query(None, description="End date for summary"),
+    current_tenant: Tenant = Depends(get_current_tenant),
+    db: Session = Depends(get_db)
+):
+    """
+    Get document summary statistics
+    
+    Returns:
+    - Total document count
+    - Count by document type
+    - Count by status
+    - Total monetary amount
+    - Period information
+    
+    Requirements: 9.1 - document statistics and reporting
+    """
+    try:
+        service = DocumentService(db)
+        return service.get_document_summary(
+            tenant_id=current_tenant.id,
+            fecha_desde=fecha_desde,
+            fecha_hasta=fecha_hasta
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error generating document summary"
+        )
+
+
+# =============================================================================
+# PARAMETERIZED ROUTES (must come after specific routes)
+# =============================================================================
+
 @router.get(
     "/{document_id}",
-    response_model=DocumentDetail,
+    response_model=DocumentResponse,
     summary="Get document details",
     description="Retrieve complete document information including line items and relationships"
 )
@@ -212,52 +305,6 @@ async def list_documents(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error listing documents"
-        )
-
-
-@router.get(
-    "/search",
-    response_model=DocumentList,
-    summary="Search documents",
-    description="Search documents across multiple fields"
-)
-async def search_documents(
-    q: str = Query(..., min_length=3, description="Search term"),
-    fields: Optional[List[str]] = Query(
-        None, 
-        description="Specific fields to search in (default: all searchable fields)"
-    ),
-    page: int = Query(1, ge=1, description="Page number"),
-    size: int = Query(20, ge=1, le=100, description="Page size"),
-    current_tenant: Tenant = Depends(get_current_tenant),
-    db: Session = Depends(get_db)
-):
-    """
-    Search documents across multiple fields
-    
-    Searches in the following fields by default:
-    - Consecutive number
-    - Document key
-    - Issuer name and identification
-    - Receiver name and identification
-    - Observations
-    
-    Requirements: 9.1 - document search functionality across all fields
-    """
-    try:
-        service = DocumentService(db)
-        return service.search_documents(
-            tenant_id=current_tenant.id,
-            search_term=q,
-            search_fields=fields,
-            page=page,
-            size=size
-        )
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error searching documents"
         )
 
 
@@ -695,45 +742,6 @@ async def get_document_references(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error retrieving document references"
-        )
-
-
-@router.get(
-    "/summary",
-    response_model=DocumentSummary,
-    summary="Get document summary",
-    description="Get document statistics and summary information"
-)
-async def get_document_summary(
-    fecha_desde: Optional[date] = Query(None, description="Start date for summary"),
-    fecha_hasta: Optional[date] = Query(None, description="End date for summary"),
-    current_tenant: Tenant = Depends(get_current_tenant),
-    db: Session = Depends(get_db)
-):
-    """
-    Get document summary statistics
-    
-    Returns:
-    - Total document count
-    - Count by document type
-    - Count by status
-    - Total monetary amount
-    - Period information
-    
-    Requirements: 9.1 - document statistics and reporting
-    """
-    try:
-        service = DocumentService(db)
-        return service.get_document_summary(
-            tenant_id=current_tenant.id,
-            fecha_desde=fecha_desde,
-            fecha_hasta=fecha_hasta
-        )
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error generating document summary"
         )
 
 

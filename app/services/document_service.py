@@ -668,8 +668,8 @@ class DocumentService:
                 numero_vin_serie=getattr(detalle, 'numero_vin_serie', None),
                 registro_medicamento=getattr(detalle, 'registro_medicamento', None),
                 forma_farmaceutica=getattr(detalle, 'forma_farmaceutica', None),
-                # Commercial codes
-                codigos_comerciales=getattr(detalle, 'codigos_comerciales', None),
+                # Commercial codes - Convert to dict for JSON serialization
+                codigos_comerciales=[code.dict() for code in detalle.codigos_comerciales] if hasattr(detalle, 'codigos_comerciales') and detalle.codigos_comerciales else None,
                 # Package components  
                 detalle_surtido=getattr(detalle, 'detalle_surtido', None),
                 # Additional fields
@@ -703,7 +703,17 @@ class DocumentService:
             query = query.filter(Document.tipo_documento == filters.tipo_documento)
         
         if filters.estado:
-            query = query.filter(Document.estado == filters.estado)
+            # Convert string back to model enum for database comparison
+            from app.models.document import DocumentStatus as ModelDocumentStatus
+            if isinstance(filters.estado, str):
+                try:
+                    estado_enum = ModelDocumentStatus(filters.estado)
+                    query = query.filter(Document.estado == estado_enum)
+                except ValueError:
+                    # Invalid status, filter will return no results
+                    query = query.filter(Document.estado == None)
+            else:
+                query = query.filter(Document.estado == filters.estado)
         
         if filters.fecha_desde:
             query = query.filter(Document.fecha_emision >= filters.fecha_desde)
