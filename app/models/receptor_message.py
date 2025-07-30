@@ -122,7 +122,7 @@ class ReceptorMessage(Base):
                        comment="User who created the message")
     
     # Relationships
-    documento = relationship("Document", back_populates="mensajes_receptor")
+    # documento = relationship("Document", back_populates="mensajes_receptor")
     
     # Table constraints and indexes
     __table_args__ = (

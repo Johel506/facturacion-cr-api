@@ -228,7 +228,7 @@ class Document(Base):
     detalles = relationship("DocumentDetail", back_populates="documento", cascade="all, delete-orphan")
     referencias = relationship("DocumentReference", back_populates="documento", cascade="all, delete-orphan")
     otros_cargos = relationship("DocumentOtherCharge", back_populates="documento", cascade="all, delete-orphan")
-    # mensajes_receptor = relationship("ReceptorMessage", back_populates="documento")
+    # mensajes_receptor = relationship("ReceptorMessage", back_populates="documento", lazy="dynamic")
     
     # Table constraints and indexes
     __table_args__ = (

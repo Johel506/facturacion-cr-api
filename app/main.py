@@ -42,6 +42,56 @@ def create_application() -> FastAPI:
         redoc_url="/redoc",
         lifespan=lifespan
     )
+    
+    # Configure OpenAPI security schemes for Swagger UI
+    def custom_openapi():
+        if app.openapi_schema:
+            return app.openapi_schema
+        
+        from fastapi.openapi.utils import get_openapi
+        
+        openapi_schema = get_openapi(
+            title=app.title,
+            version=app.version,
+            description=app.description,
+            routes=app.routes,
+        )
+        
+        # Add security schemes
+        openapi_schema["components"]["securitySchemes"] = {
+            "ApiKeyAuth": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "X-API-Key",
+                "description": "API Key authentication. Use format: X-API-Key: your_api_key_here"
+            },
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "description": "Bearer token authentication. Use format: Authorization: Bearer your_api_key_here"
+            }
+        }
+        
+        # Apply security globally to all endpoints except exempt ones
+        exempt_paths = {"/health", "/docs", "/redoc", "/openapi.json"}
+        
+        for path, path_item in openapi_schema["paths"].items():
+            # Skip exempt paths
+            if any(path.startswith(exempt) for exempt in exempt_paths):
+                continue
+                
+            # Add security requirement to all operations in this path
+            for operation in path_item.values():
+                if isinstance(operation, dict) and "operationId" in operation:
+                    operation["security"] = [
+                        {"ApiKeyAuth": []},
+                        {"BearerAuth": []}
+                    ]
+        
+        app.openapi_schema = openapi_schema
+        return app.openapi_schema
+    
+    app.openapi = custom_openapi
 
     # Set up CORS
     app.add_middleware(

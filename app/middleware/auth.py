@@ -108,7 +108,6 @@ class APIKeyAuthMiddleware(BaseHTTPMiddleware):
             path in self.EXEMPT_PATHS or 
             path.startswith("/static/") or
             path.endswith("/openapi.json") or  # Allow openapi.json at any path level
-            path == "/api/v1/tenants/" or  # Allow tenant creation
             path == "/api/v1/auth/health" or  # Allow auth health check
             path == "/api/v1/auth/token/validate"  # Allow JWT token validation
         )
@@ -171,7 +170,6 @@ class APIKeyAuthMiddleware(BaseHTTPMiddleware):
                 auth_type, token = auth_parts
                 if auth_type.lower() in ["bearer", "apikey"]:
                     return token.strip()
-        
         return None
     
     def _is_valid_api_key_format(self, api_key: str) -> bool:
@@ -202,9 +200,11 @@ class APIKeyAuthMiddleware(BaseHTTPMiddleware):
         Returns:
             Tenant object or None if not found
         """
+        db: Session = None
         try:
-            # Get database session
-            db: Session = next(get_db())
+            # Get database session using the generator properly
+            db_gen = get_db()
+            db = next(db_gen)
             
             # Query tenant by API key hash
             # Note: We need to check against all tenants since we hash the key
@@ -212,16 +212,22 @@ class APIKeyAuthMiddleware(BaseHTTPMiddleware):
             
             for tenant in tenants:
                 if verify_tenant_api_key(api_key, tenant.api_key):
+                    # Detach the tenant from the session to avoid issues
+                    db.expunge(tenant)
                     return tenant
-            
             return None
             
         except Exception as e:
-            print(f"Auth error: {e}")  # Debug print
+            print(f"Auth middleware error: {e}")  # Debug print
+            import traceback
+            traceback.print_exc()
             return None
         finally:
-            if 'db' in locals():
-                db.close()
+            if db is not None:
+                try:
+                    db.close()
+                except:
+                    pass
     
     def _create_auth_error_response(self, message: str, status_code: int) -> JSONResponse:
         """
