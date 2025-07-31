@@ -443,11 +443,20 @@ class DocumentService:
         self.db.refresh(document)
         
         # Log status change
-        self._log_document_activity(document_id, "status_updated", {
-            "old_status": old_status.value if old_status else None,
-            "new_status": status_update.estado.value,
-            "updated_by": updated_by
-        })
+        try:
+            old_status_value = old_status.value if old_status and hasattr(old_status, 'value') else str(old_status) if old_status else None
+            new_status_value = status_update.estado.value if hasattr(status_update.estado, 'value') else str(status_update.estado)
+            
+            self._log_document_activity(document_id, "status_updated", {
+                "old_status": old_status_value,
+                "new_status": new_status_value,
+                "updated_by": updated_by
+            })
+        except Exception as e:
+            # Log the logging error but don't fail the transaction
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to log document activity: {e}")
         
         return document
     
@@ -757,6 +766,9 @@ class DocumentService:
     
     def _document_to_response(self, document: Document) -> DocumentResponse:
         """Convert document model to response schema"""
+        # Get estado value for comparison
+        estado_value = document.estado.value if hasattr(document.estado, 'value') else str(document.estado)
+        
         return DocumentResponse(
             id=document.id,
             tipo_documento=document.tipo_documento,
@@ -767,14 +779,14 @@ class DocumentService:
             emisor_identificacion=document.emisor_numero_identificacion,
             receptor_nombre=document.receptor_nombre,
             receptor_identificacion=document.receptor_numero_identificacion,
-            estado=document.estado,
+            estado=estado_value,  # Now enum values match between model and schema
             total_venta_neta=document.total_venta_neta,
             total_impuesto=document.total_impuesto,
             total_comprobante=document.total_comprobante,
             codigo_moneda=document.codigo_moneda,
             tipo_cambio=document.tipo_cambio,
             xml_url=f"/api/v1/documents/{document.id}/xml" if document.xml_firmado else None,
-            pdf_url=f"/api/v1/documents/{document.id}/pdf" if document.estado == DocumentStatus.ACEPTADO else None,
+            pdf_url=f"/api/v1/documents/{document.id}/pdf" if estado_value == "ACEPTADO" else None,
             created_at=document.created_at,
             updated_at=document.updated_at
         )

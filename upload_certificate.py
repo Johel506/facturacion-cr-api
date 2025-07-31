@@ -9,9 +9,10 @@ import os
 import sys
 
 # Configuración
-API_BASE = "http://localhost:8001/api/v1"
-TENANT_ID = "78785c89-453a-4c9b-bafb-687f63360f33"
-API_KEY = "cr_78785c89_1XrlyCQqcGP33Twwe46d7IdzsDvx64UvevaDdjwwd3ZnURt9z2gOyB01C5ClvVP7JlEl-g"
+API_BASE = "http://localhost:8000/api/v1"
+TENANT_ID = "02640646-3f6a-4ca9-b912-19e1cc72e64d"
+API_KEY = "cr_02640646_0PorxOcoJjTYG9pc8QPYfTRV-RRlEQqkcGHJNtppNr76uK8aXqApokkvrI4NzybZDEp0wg"
+
 
 # Tu certificado (usando el original que funciona con OpenSSL legacy)
 CERT_FILE = "011858030301.p12"

@@ -29,14 +29,14 @@ class DocumentType(enum.Enum):
 
 class DocumentStatus(enum.Enum):
     """Document processing status"""
-    BORRADOR = "borrador"
-    PENDIENTE = "pendiente"
-    ENVIADO = "enviado"
-    PROCESANDO = "procesando"
-    ACEPTADO = "aceptado"
-    RECHAZADO = "rechazado"
-    ERROR = "error"
-    CANCELADO = "cancelado"
+    BORRADOR = "BORRADOR"
+    PENDIENTE = "PENDIENTE"
+    ENVIADO = "ENVIADO"
+    PROCESANDO = "PROCESANDO"
+    ACEPTADO = "ACEPTADO"
+    RECHAZADO = "RECHAZADO"
+    ERROR = "ERROR"
+    CANCELADO = "CANCELADO"
 
 
 class IdentificationType(enum.Enum):

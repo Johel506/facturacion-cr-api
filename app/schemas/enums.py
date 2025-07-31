@@ -228,14 +228,14 @@ class ReceptorMessageType(int, Enum):
 
 class DocumentStatus(str, Enum):
     """Document processing status."""
-    BORRADOR = "borrador"
-    PENDING = "pendiente"
-    SENT = "enviado"
-    PROCESSING = "procesando"
-    ACCEPTED = "aceptado"
-    REJECTED = "rechazado"
-    ERROR = "error"
-    CANCELLED = "cancelado"
+    BORRADOR = "BORRADOR"
+    PENDIENTE = "PENDIENTE"
+    ENVIADO = "ENVIADO"
+    PROCESANDO = "PROCESANDO"
+    ACEPTADO = "ACEPTADO"
+    RECHAZADO = "RECHAZADO"
+    ERROR = "ERROR"
+    CANCELADO = "CANCELADO"
 
 
 class TenantPlan(str, Enum):

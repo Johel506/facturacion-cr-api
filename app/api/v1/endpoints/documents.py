@@ -17,7 +17,7 @@ from app.models.document import Document
 from app.models.document_reference import DocumentReference
 from app.schemas.documents import (
     DocumentCreate, DocumentResponse, DocumentDetail, DocumentList,
-    DocumentFilters, DocumentStatusUpdate, DocumentSummary
+    DocumentFilters, DocumentSummary, DocumentStatusUpdate
 )
 from app.schemas.enums import DocumentType, DocumentStatus
 from app.services.document_service import DocumentService
@@ -352,9 +352,12 @@ async def update_document_status(
             detail="Document not found"
         )
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error updating document status {document_id}: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error updating document status"
+            detail=f"Internal server error updating document status: {str(e)}"
         )
 
 
@@ -417,9 +420,12 @@ async def download_document_xml(
             detail="Document not found"
         )
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error downloading XML for document {document_id}: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error downloading XML"
+            detail=f"Internal server error downloading XML: {str(e)}"
         )
 
 
@@ -457,15 +463,17 @@ async def check_document_status(
             raise DocumentNotFoundError("Document not found")
         
         # Return comprehensive status information
+        estado_value = document.estado.value if hasattr(document.estado, 'value') else str(document.estado)
+        
         status_info = {
             "document_id": str(document.id),
             "clave": document.clave,
-            "estado": document.estado.value if document.estado else "unknown",
+            "estado": estado_value,
             "fecha_emision": document.fecha_emision.isoformat(),
             "fecha_procesamiento": document.fecha_procesamiento.isoformat() if document.fecha_procesamiento else None,
-            "fecha_aceptacion": document.fecha_aceptacion.isoformat() if hasattr(document, 'fecha_aceptacion') and document.fecha_aceptacion else None,
+            "fecha_aceptacion": document.fecha_aceptacion.isoformat() if document.fecha_aceptacion else None,
             "mensaje_hacienda": document.mensaje_hacienda,
-            "intentos_envio": document.intentos_envio if hasattr(document, 'intentos_envio') else 0,
+            "intentos_envio": document.intentos_envio or 0,
             "xml_firmado_disponible": bool(document.xml_firmado),
             "xml_respuesta_disponible": bool(document.xml_respuesta_hacienda),
             "puede_reenviar": document.estado in [DocumentStatus.ERROR, DocumentStatus.RECHAZADO] if hasattr(document, 'estado') else False,
@@ -480,9 +488,12 @@ async def check_document_status(
             detail="Document not found"
         )
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error checking document status {document_id}: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error checking document status"
+            detail=f"Internal server error checking document status: {str(e)}"
         )
 
 
@@ -534,9 +545,12 @@ async def download_document_pdf(
             detail="Document not found"
         )
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error generating PDF for document {document_id}: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error generating PDF"
+            detail=f"Internal server error generating PDF: {str(e)}"
         )
 
 
@@ -603,9 +617,12 @@ async def resend_document(
             detail="Document not found"
         )
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error resending document {document_id}: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error resending document"
+            detail=f"Internal server error resending document: {str(e)}"
         )
 
 
@@ -668,9 +685,12 @@ async def cancel_document(
             detail="Document not found"
         )
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error canceling document {document_id}: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error cancelling document"
+            detail=f"Internal server error cancelling document: {str(e)}"
         )
 
 
@@ -711,13 +731,13 @@ async def get_document_references(
         referencing_docs = db.query(Document).join(DocumentReference).filter(
             and_(
                 Document.tenant_id == current_tenant.id,
-                DocumentReference.numero == document.clave
+                DocumentReference.numero_referencia == document.clave
             )
         ).all()
         
         # Find documents referenced by this document
         if hasattr(document, 'referencias') and document.referencias:
-            referenced_keys = [ref.numero for ref in document.referencias if ref.numero]
+            referenced_keys = [ref.numero_referencia for ref in document.referencias if ref.numero_referencia]
             referenced_docs = db.query(Document).filter(
                 and_(
                     Document.tenant_id == current_tenant.id,
@@ -739,9 +759,12 @@ async def get_document_references(
             detail="Document not found"
         )
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error retrieving references for document {document_id}: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error retrieving document references"
+            detail=f"Internal server error retrieving document references: {str(e)}"
         )
 
 

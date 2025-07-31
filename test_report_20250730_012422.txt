@@ -1,0 +1,50 @@
+REPORTE DE PRUEBAS DE ENDPOINTS
+==================================================
+
+Fecha: 2025-07-30 01:24:22
+API Key: cr_02640646_0PorxOco...
+Tenant ID: 02640646-3f6a-4ca9-b912-19e1cc72e64d
+
+RESUMEN:
+Total módulos: 7
+Exitosos: 1
+Fallidos: 6
+Porcentaje éxito: 14.3%
+Tiempo total: 325.24s
+
+DETALLES POR MÓDULO:
+
+🔐 Endpoints de Autenticación:
+  Script: test_auth_endpoints_complete.py
+  Estado: ÉXITO
+  Duración: 21.07s
+
+🏢 Endpoints de Tenants:
+  Script: test_tenant_endpoints_complete.py
+  Estado: FALLÓ
+  Duración: 21.94s
+
+🏷️ Endpoints de CABYS:
+  Script: test_cabys_endpoints_complete.py
+  Estado: FALLÓ
+  Duración: 62.83s
+
+📄 Endpoints de Documentos:
+  Script: test_documents_endpoints_complete.py
+  Estado: FALLÓ
+  Duración: 32.10s
+
+💬 Endpoints de Mensajes Receptor:
+  Script: test_messages_endpoints_complete.py
+  Estado: FALLÓ
+  Duración: 45.18s
+
+🗺️ Endpoints de Datos de Referencia:
+  Script: test_reference_data_endpoints_complete.py
+  Estado: FALLÓ
+  Duración: 123.55s
+
+🛠️ Endpoints de Utilidades:
+  Script: test_utils_endpoints_complete.py
+  Estado: FALLÓ
+  Duración: 6.58s
