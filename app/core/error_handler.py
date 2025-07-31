@@ -866,6 +866,118 @@ class ErrorHandler:
         """Reset error statistics"""
         self.error_counts.clear()
         logger.info("Error statistics reset")
+    
+    def get_error_trends(self, hours: int = 24) -> Dict[str, Any]:
+        """Get error trends over specified time period"""
+        try:
+            from datetime import datetime, timedelta
+            
+            # This would typically query a time-series database
+            # For now, return current statistics with trend indicators
+            current_stats = self.get_error_statistics()
+            
+            # Calculate trend indicators (simplified)
+            total_errors = current_stats["total_errors"]
+            trend_indicator = "stable"
+            
+            if total_errors > 100:
+                trend_indicator = "increasing"
+            elif total_errors < 10:
+                trend_indicator = "decreasing"
+            
+            return {
+                "time_period_hours": hours,
+                "current_statistics": current_stats,
+                "trend_indicator": trend_indicator,
+                "recommendations": self._get_trend_recommendations(trend_indicator, total_errors),
+                "calculated_at": datetime.utcnow().isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Error calculating error trends: {e}")
+            return {
+                "error": f"Failed to calculate trends: {e}",
+                "calculated_at": datetime.utcnow().isoformat()
+            }
+    
+    def _get_trend_recommendations(self, trend: str, total_errors: int) -> List[str]:
+        """Get recommendations based on error trends"""
+        recommendations = []
+        
+        if trend == "increasing":
+            recommendations.extend([
+                "Monitor system health closely",
+                "Check for recent deployments or configuration changes",
+                "Review error patterns for common causes",
+                "Consider scaling resources if needed"
+            ])
+        elif trend == "stable" and total_errors > 50:
+            recommendations.extend([
+                "Review recurring error patterns",
+                "Implement preventive measures for common errors",
+                "Consider improving error handling in problematic areas"
+            ])
+        elif trend == "decreasing":
+            recommendations.extend([
+                "Continue monitoring current practices",
+                "Document successful error reduction strategies"
+            ])
+        
+        return recommendations
+    
+    def get_error_summary_report(self) -> Dict[str, Any]:
+        """Generate comprehensive error summary report"""
+        try:
+            stats = self.get_error_statistics()
+            trends = self.get_error_trends()
+            
+            # Get top error categories
+            categories = stats.get("categories", {})
+            top_categories = sorted(categories.items(), key=lambda x: x[1], reverse=True)[:5]
+            
+            # Calculate error severity distribution
+            severity_distribution = self._calculate_severity_distribution()
+            
+            return {
+                "summary": {
+                    "total_errors": stats["total_errors"],
+                    "unique_error_types": len(self.error_counts),
+                    "trend": trends["trend_indicator"],
+                    "report_generated_at": datetime.utcnow().isoformat()
+                },
+                "top_error_categories": [
+                    {"category": cat, "count": count, "percentage": round(count/stats["total_errors"]*100, 2) if stats["total_errors"] > 0 else 0}
+                    for cat, count in top_categories
+                ],
+                "severity_distribution": severity_distribution,
+                "recommendations": trends["recommendations"],
+                "detailed_statistics": stats
+            }
+        except Exception as e:
+            logger.error(f"Error generating summary report: {e}")
+            return {
+                "error": f"Failed to generate report: {e}",
+                "report_generated_at": datetime.utcnow().isoformat()
+            }
+    
+    def _calculate_severity_distribution(self) -> Dict[str, int]:
+        """Calculate distribution of errors by severity"""
+        severity_counts = {
+            "low": 0,
+            "medium": 0,
+            "high": 0,
+            "critical": 0
+        }
+        
+        for key, count in self.error_counts.items():
+            category_str = key.split(":")[0]
+            try:
+                category = ErrorCategory(category_str)
+                severity = self._get_severity_for_category(category)
+                severity_counts[severity.value] += count
+            except ValueError:
+                severity_counts["medium"] += count  # Default for unknown categories
+        
+        return severity_counts
 
 
 # Global error handler instance
