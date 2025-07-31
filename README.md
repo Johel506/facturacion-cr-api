@@ -225,9 +225,9 @@ pytest --cov=app --cov-report=html
 ### XML validation tests
 
 ```bash
-python test_xml_generator.py
-python test_xml_signature.py
-python test_xsd_validation.py
+python test_files/test_xml_generator.py
+python test_files/test_xml_signature.py
+python test_files/test_xsd_validation.py
 ```
 
 ## 💻 Development

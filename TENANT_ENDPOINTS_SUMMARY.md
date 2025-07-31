@@ -73,7 +73,7 @@ TENANT_ID = "[uuid-tenant-id]"
 BASE_URL = "http://localhost:8000"
 ```
 
-> **Nota**: Las credenciales reales se generan usando el script `create_working_api_key.py`
+> **Nota**: Las credenciales reales se generan usando el script `setup_scripts/create_working_api_key.py`
 
 ## 🎉 SWAGGER UI COMPLETAMENTE FUNCIONAL
 
@@ -89,16 +89,16 @@ BASE_URL = "http://localhost:8000"
 1. Ir a `http://localhost:8000/docs`
 2. Hacer clic en el botón **"Authorize"** (ahora visible)
 3. Seleccionar **"ApiKeyAuth"**
-4. Ingresar la API key generada con el script `create_working_api_key.py`
+4. Ingresar la API key generada con el script `setup_scripts/create_working_api_key.py`
 5. Hacer clic en **"Authorize"**
 6. ¡Ahora puedes probar todos los endpoints directamente desde Swagger!
 
 ## 🧪 ARCHIVOS DE PRUEBA CREADOS
 
-1. **`test_tenant_endpoints_complete.py`**: Script completo para probar todos los endpoints
-2. **`create_working_api_key.py`**: Script para generar API keys válidas
-3. **`debug_auth_middleware.py`**: Script para debuggear problemas de autenticación
-4. **`test_tenant_simple.py`**: Script de diagnóstico básico
+1. **`test_files/test_tenant_endpoints_complete.py`**: Script completo para probar todos los endpoints
+2. **`setup_scripts/create_working_api_key.py`**: Script para generar API keys válidas
+3. **`debug_files/debug_auth_middleware.py`**: Script para debuggear problemas de autenticación
+4. **`test_files/test_tenant_simple.py`**: Script de diagnóstico básico
 
 ## 🎯 CAMBIOS TÉCNICOS REALIZADOS
 

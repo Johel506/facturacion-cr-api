@@ -5,56 +5,56 @@ Esta guía contiene todos los scripts de prueba para validar el funcionamiento c
 ## 📋 Scripts de Prueba Disponibles
 
 ### 🔐 Autenticación
-- **`test_auth_endpoints_complete.py`** - Prueba todos los endpoints de autenticación
+- **`test_files/test_auth_endpoints_complete.py`** - Prueba todos los endpoints de autenticación
   - Validación de API keys
   - Generación y validación de JWT tokens
   - Información de límites y rate limiting
   - Health checks del servicio de auth
 
 ### 🏢 Tenants
-- **`test_tenant_endpoints_complete.py`** - Prueba todos los endpoints de tenants
+- **`test_files/test_tenant_endpoints_complete.py`** - Prueba todos los endpoints de tenants
   - Gestión de tenants (CRUD)
   - Certificados digitales
   - Estadísticas y uso
   - Planes y límites
 
 ### 🏷️ CABYS
-- **`test_cabys_endpoints_complete.py`** - Prueba todos los endpoints de códigos CABYS
+- **`test_files/test_cabys_endpoints_complete.py`** - Prueba todos los endpoints de códigos CABYS
   - Búsqueda de códigos
   - Validación de códigos
   - Categorías y estadísticas
   - Códigos más usados
 
 ### 📄 Documentos
-- **`test_documents_endpoints_complete.py`** - Prueba todos los endpoints de documentos
+- **`test_files/test_documents_endpoints_complete.py`** - Prueba todos los endpoints de documentos
   - Creación de documentos electrónicos
   - Consulta y filtrado
   - Gestión de estados
   - Descarga de XML y PDF
 
 ### 💬 Mensajes Receptor
-- **`test_messages_endpoints_complete.py`** - Prueba todos los endpoints de mensajes
+- **`test_files/test_messages_endpoints_complete.py`** - Prueba todos los endpoints de mensajes
   - Creación de mensajes de aceptación/rechazo
   - Envío al Ministerio de Hacienda
   - Consulta y filtrado
   - Estadísticas
 
 ### 🗺️ Datos de Referencia
-- **`test_reference_data_endpoints_complete.py`** - Prueba todos los endpoints de datos de referencia
+- **`test_files/test_reference_data_endpoints_complete.py`** - Prueba todos los endpoints de datos de referencia
   - Ubicaciones geográficas (provincias, cantones, distritos)
   - Unidades de medida
   - Monedas soportadas
   - Números consecutivos
 
 ### 🛠️ Utilidades
-- **`test_utils_endpoints_complete.py`** - Prueba todos los endpoints de utilidades
+- **`test_files/test_utils_endpoints_complete.py`** - Prueba todos los endpoints de utilidades
   - Health checks del sistema
   - Información de versión
   - Estadísticas del sistema
   - Endpoints de monitoreo
 
 ### 🚀 Script Maestro
-- **`test_all_endpoints_complete.py`** - Ejecuta todas las pruebas de forma secuencial
+- **`test_files/test_all_endpoints_complete.py`** - Ejecuta todas las pruebas de forma secuencial
   - Reporte completo de resultados
   - Estadísticas de éxito/fallo
   - Recomendaciones basadas en resultados
@@ -84,31 +84,31 @@ BASE_URL = "https://tu-servidor.com"  # Para servidor remoto
 
 ### Ejecutar Todas las Pruebas
 ```bash
-python test_all_endpoints_complete.py
+python test_files/test_all_endpoints_complete.py
 ```
 
 ### Ejecutar Pruebas Individuales
 ```bash
 # Autenticación
-python test_auth_endpoints_complete.py
+python test_files/test_auth_endpoints_complete.py
 
 # Tenants
-python test_tenant_endpoints_complete.py
+python test_files/test_tenant_endpoints_complete.py
 
 # CABYS
-python test_cabys_endpoints_complete.py
+python test_files/test_cabys_endpoints_complete.py
 
 # Documentos
-python test_documents_endpoints_complete.py
+python test_files/test_documents_endpoints_complete.py
 
 # Mensajes
-python test_messages_endpoints_complete.py
+python test_files/test_messages_endpoints_complete.py
 
 # Datos de Referencia
-python test_reference_data_endpoints_complete.py
+python test_files/test_reference_data_endpoints_complete.py
 
 # Utilidades
-python test_utils_endpoints_complete.py
+python test_files/test_utils_endpoints_complete.py
 ```
 
 ## 📊 Interpretación de Resultados
@@ -251,11 +251,11 @@ Para mejorar los scripts:
 
 ```bash
 # 1. Ejecutar todas las pruebas
-python test_all_endpoints_complete.py
+python test_files/test_all_endpoints_complete.py
 
 # 2. Si hay problemas, ejecutar pruebas individuales
-python test_auth_endpoints_complete.py
-python test_tenant_endpoints_complete.py
+python test_files/test_auth_endpoints_complete.py
+python test_files/test_tenant_endpoints_complete.py
 # ... etc
 
 # 3. Revisar el reporte generado
@@ -264,7 +264,7 @@ cat test_report_*.txt
 # 4. Corregir problemas identificados
 
 # 5. Re-ejecutar pruebas para verificar correcciones
-python test_all_endpoints_complete.py
+python test_files/test_all_endpoints_complete.py
 ```
 
 ¡Los scripts están listos para usar con las credenciales proporcionadas! 🚀

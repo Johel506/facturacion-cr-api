@@ -32,7 +32,7 @@ You can also use any token that starts with:
 ## 🐍 Using Python Script
 
 ```bash
-python test_api.py
+python test_files/test_api.py
 ```
 
 ## 📡 Using cURL

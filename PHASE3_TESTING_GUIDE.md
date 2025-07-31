@@ -10,7 +10,7 @@
 ### **1. Quick Test - Document Creation**
 ```bash
 # Test basic document creation functionality
-python3 test_simple_creation.py
+python3 test_files/test_simple_creation.py
 ```
 
 **Expected Output**:
@@ -23,7 +23,7 @@ Document Key: [50-character key]
 ### **2. Verify Database Enums**
 ```bash
 # Check current enum values in database
-python3 check_current_enums.py
+python3 setup_scripts/check_current_enums.py
 ```
 
 **Expected**: All enums should show numeric values ('01', '02', etc.)
@@ -31,7 +31,7 @@ python3 check_current_enums.py
 ### **3. Legacy Compatibility Test**
 ```bash
 # Test enum conversion compatibility
-python3 test_with_old_enums.py
+python3 test_files/test_with_old_enums.py
 ```
 
 ### **4. API Server Test** (Optional)
@@ -105,14 +105,14 @@ cat tenant_info.json
 ## 📋 **Success Criteria**
 
 ### **✅ Document Creation Working When:**
-- test_simple_creation.py completes without errors
+- test_files/test_simple_creation.py completes without errors
 - Document ID and 50-character key are generated
 - Database INSERT operations succeed
 - All enum values validate correctly (tipo_documento='01', etc.)
 
 ### **✅ Migration Status Correct When:**
 - `alembic current` shows `9d13c8cc543d (head)`
-- check_current_enums.py shows numeric enum values
+- setup_scripts/check_current_enums.py shows numeric enum values
 - No enum validation errors during document creation
 
 ### **✅ Database Integration Working When:**

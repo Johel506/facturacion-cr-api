@@ -84,17 +84,17 @@ Document Key: 50629072500310185803000100001010000000002146264253
 ### **1. test_simple_creation.py**
 **Purpose**: Direct document creation test using proper schema structure  
 **Status**: ✅ Working - Successfully creates documents  
-**Usage**: `python3 test_simple_creation.py`
+**Usage**: `python3 test_files/test_simple_creation.py`
 
 ### **2. test_with_old_enums.py** 
 **Purpose**: Legacy compatibility test for enum validation  
 **Status**: ✅ Working - Validates enum conversion  
-**Usage**: `python3 test_with_old_enums.py`
+**Usage**: `python3 test_files/test_with_old_enums.py`
 
 ### **3. check_current_enums.py**
 **Purpose**: Database enum inspection and validation  
 **Status**: ✅ Working - Shows current enum values  
-**Usage**: `python3 check_current_enums.py`
+**Usage**: `python3 setup_scripts/check_current_enums.py`
 
 ---
 
@@ -110,9 +110,9 @@ Document Key: 50629072500310185803000100001010000000002146264253
 - `alembic/versions/8bf5a08cfa42_fix_identification_type_enum.py` - ID type fix
 
 ### **Test Files (New)**:
-- `test_simple_creation.py` - Primary testing script
-- `test_with_old_enums.py` - Legacy compatibility test
-- `check_current_enums.py` - Database inspection tool
+- `test_files/test_simple_creation.py` - Primary testing script
+- `test_files/test_with_old_enums.py` - Legacy compatibility test
+- `setup_scripts/check_current_enums.py` - Database inspection tool
 - `tenant_info.json` - Test tenant configuration
 
 ### **Documentation**:
